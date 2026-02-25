@@ -61,10 +61,11 @@ interface SubResponse {
   default: boolean;
 }
 
-enum KisskhCountry {
-  CHINESE = "1",
-  KOREAN = "2",
-}
+const KISSKH_COUNTRY: Record<string, string> = {
+  Chinese: "1",
+  Korean: "2",
+  Philippine: "8",
+};
 
 class KissKHScraperr extends BaseProvider {
   readonly baseUrl: string = "https://kisskh.co";
@@ -74,7 +75,6 @@ class KissKHScraperr extends BaseProvider {
     Prefix.TVDB,
     Prefix.KISSKH,
   ];
-  private readonly pageSize = 20;
   private readonly subGuid: string = "VgV52sWhwvBSf8BsM3BRY9weWiiCbtGp";
   private readonly viGuid: string = "62f176f3bb1b5b8e70e39932ad34a0c7";
   private readonly searchUrl: string =
@@ -136,46 +136,29 @@ class KissKHScraperr extends BaseProvider {
     type: ContentType,
     skip?: number,
   ): Promise<MetaPreview[]> {
-    let urls = [];
-    let urlNum = 2;
-    const page = this.getPage(this.pageSize, skip, urlNum);
     const t = this.TYPE[type];
     const ongoing = 1;
     const completed = 2;
-    switch (id) {
-      // case KisskhCatalog.MOVIE_KOREAN:
-      case KisskhCatalog.SERIES_KOREAN:
-        urls.push(
-          this.exploreUrl +
-            `?page=${page}&type=${t}&sub=0&country=${KisskhCountry.KOREAN}&status=${ongoing}&order=2`,
-        );
-        urls.push(
-          this.exploreUrl +
-            `?page=${page}&type=${t}&sub=0&country=${KisskhCountry.KOREAN}&status=${completed}&order=2`,
-        );
-        break;
-      // case KisskhCatalog.MOVIE_CHINESE:
-      case KisskhCatalog.SERIES_CHINESE:
-        urls.push(
-          this.exploreUrl +
-            `?page=${page}&type=${t}&sub=0&country=${KisskhCountry.CHINESE}&status=${ongoing}&order=2`,
-        );
-        urls.push(
-          this.exploreUrl +
-            `?page=${page}&type=${t}&sub=0&country=${KisskhCountry.CHINESE}&status=${completed}&order=2`,
-        );
-        break;
-      default:
-        urls.push(
-          this.exploreUrl +
-            `?page=${page}&type=${t}&sub=0&country=${KisskhCountry.CHINESE}&status=${ongoing}&order=2`,
-        );
-        urls.push(
-          this.exploreUrl +
-            `?page=${page}&type=${t}&sub=0&country=${KisskhCountry.CHINESE}&status=${completed}&order=2`,
-        );
-        break;
+    const [prefix, typeStr, countryName] = id.split(".");
+    const country = countryName
+      ? KISSKH_COUNTRY[countryName]
+      : KISSKH_COUNTRY["KOREAN"];
+    const pageSize = 20;
+    let urls = [];
+    let urlNum = 1;
+    let page = this.getPage(pageSize, skip, urlNum);
+    if (type === "series") {
+      urlNum = 2;
+      page = this.getPage(pageSize, skip, urlNum);
+      urls.push(
+        this.exploreUrl +
+          `?page=${page}&type=${t}&sub=0&country=${country}&status=${ongoing}&order=2`,
+      );
     }
+    urls.push(
+      this.exploreUrl +
+        `?page=${page}&type=${t}&sub=0&country=${country}&status=${completed}&order=2`,
+    );
     const promises = urls.map(async (url) => {
       this.logger.log(`GET catalog | ${url}`);
       return axiosGet(url);

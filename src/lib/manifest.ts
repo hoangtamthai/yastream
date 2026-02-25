@@ -24,8 +24,10 @@ export const KisskhSearchCatalog = {
 };
 export const KisskhCatalog = {
   // SERIES_NEW: `${Prefix.KISSKH}.series.New`,
-  SERIES_KOREAN: `${Prefix.KISSKH}.series.Korean`,
-  SERIES_CHINESE: `${Prefix.KISSKH}.series.Chinese`,
+  // SERIES_KOREAN: `${Prefix.KISSKH}.series.Korean`,
+  // SERIES_CHINESE: `${Prefix.KISSKH}.series.Chinese`,
+  SERIES_PHILIPINES: `${Prefix.KISSKH}.series.Philippine`,
+  MOVIE_PHILIPINES: `${Prefix.KISSKH}.movie.Philippine`,
   // MOVIE_NEW: `${Prefix.KISSKH}.movie.New`,
   // MOVIE_KOREAN: `${Prefix.KISSKH}.movie.Korean`,
   // MOVIE_CHINESE: `${Prefix.KISSKH}.movie.Chinese`,
