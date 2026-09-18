@@ -8,7 +8,7 @@ const logger = new Logger("DB");
 export async function upsertMkvdrama(mkvdramas: EMkvdramaInsert[]) {
   if (!db) return;
   try {
-    await db.insert(mkvdrama).values(mkvdramas).run();
+    await db.insert(mkvdrama).values(mkvdramas);
     logger.debug(`Upserted mkvdrama ${mkvdramas[0]?.providerContentId}`);
   } catch (e) {
     handleError(e, logger, `Failed to upsert mkvdrama`);

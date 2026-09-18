@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { bigint, pgTable, text } from "drizzle-orm/pg-core";
 import { ouo } from "./ouo.js";
 import { providerContent } from "./provider_content.js";
-export const mkvdrama = sqliteTable("mkvdrama", {
+export const mkvdrama = pgTable("mkvdrama", {
   id: text("id").primaryKey(),
   providerContentId: text("provider_content_id")
     .notNull()
@@ -11,9 +11,9 @@ export const mkvdrama = sqliteTable("mkvdrama", {
     .unique()
     .references(() => ouo.id),
   quality: text("quality").notNull(),
-  createdAt: integer("created_at").notNull(),
-  updatedAt: integer("updated_at"),
-  ttl: integer("ttl"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
+  updatedAt: bigint("updated_at", { mode: "number" }),
+  ttl: bigint("ttl", { mode: "number" }),
 });
 
 export const mkvdramaRelations = relations(mkvdrama, ({ one }) => ({

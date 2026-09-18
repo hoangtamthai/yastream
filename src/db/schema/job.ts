@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { providerContent } from "./provider_content.js";
 
 export enum JOB_TYPE {
@@ -12,7 +12,7 @@ export enum JOB_STATUS {
   DONE = "done",
 }
 
-export const job = sqliteTable("job", {
+export const job = pgTable("job", {
   id: text("id").primaryKey(),
   status: text("status", {
     enum: [JOB_STATUS.PENDING, JOB_STATUS.FAILED, JOB_STATUS.DONE],
@@ -21,9 +21,9 @@ export const job = sqliteTable("job", {
     enum: [JOB_TYPE.MKVDRAMA_STREAM, JOB_TYPE.MKVDRAMA_SCRAPE],
   }).notNull(),
   data: text("data").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
-    .default(new Date()),
+    .defaultNow(),
 });
 
 export const jobRelations = relations(job, ({ one }) => ({

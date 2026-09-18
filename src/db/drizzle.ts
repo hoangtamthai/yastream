@@ -1,6 +1,5 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { migrate } from "drizzle-orm/libsql/migrator";
-import { withReplicas } from "drizzle-orm/sqlite-core";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Logger } from "../utils/logger.js";
 import { content, contentRelations } from "./schema/content.js";
 import { job } from "./schema/job.js";
@@ -13,61 +12,34 @@ import {
 } from "./schema/provider_content.js";
 import { stream } from "./schema/stream.js";
 import { subtitle } from "./schema/subtitle.js";
-import { sqlite } from "./sqlite.js";
+import { pg } from "./pg.js";
 import { supporter } from "./supporter/schema/supporter.js";
 
 const logger = new Logger("DB");
 
-const main = sqlite?.getDb();
-const mainDb = main
-  ? drizzle(main, {
-      schema: {
-        content,
-        providerContent,
-        streams: stream,
-        subtitles: subtitle,
-        kv,
-        mkvdrama,
-        ouo,
-        job,
-        mkvdramaRelations,
-        ouoRelations,
-        contentRelations,
-        providerContentRelations,
-      },
+const schema = {
+  content,
+  providerContent,
+  streams: stream,
+  subtitles: subtitle,
+  kv,
+  mkvdrama,
+  ouo,
+  job,
+  mkvdramaRelations,
+  ouoRelations,
+  contentRelations,
+  providerContentRelations,
+};
+
+const pool = pg?.getDb();
+const db = pool
+  ? drizzle(pool, {
+      schema,
     })
   : null;
 
-const replica = sqlite?.getReplicaDb();
-const replicaDb = replica
-  ? drizzle(replica, {
-      schema: {
-        content,
-        providerContent,
-        streams: stream,
-        subtitles: subtitle,
-        kv,
-        mkvdrama,
-        ouo,
-        job,
-        mkvdramaRelations,
-        ouoRelations,
-        contentRelations,
-        providerContentRelations,
-      },
-    })
-  : null;
-
-const db =
-  mainDb != null && replicaDb != null
-    ? withReplicas(mainDb, [replicaDb])
-    : mainDb != null
-      ? mainDb
-      : replicaDb != null
-        ? replicaDb
-        : null;
-
-const supporterDbClient = sqlite?.getSupporterDb();
+const supporterDbClient = pg?.getSupporterDb();
 const supporterDb = supporterDbClient
   ? drizzle(supporterDbClient, {
       schema: {
@@ -78,16 +50,16 @@ const supporterDb = supporterDbClient
 
 export { db, supporterDb };
 
-export function initMigrations() {
+export async function initMigrations() {
   try {
     if (db) {
-      migrate(db, { migrationsFolder: "drizzle/yastream" });
+      await migrate(db, { migrationsFolder: "drizzle/yastream" });
       logger.log("Migration yastream completed");
     } else {
       logger.log("Migration skipped: Database not initialized");
     }
     if (supporterDb) {
-      migrate(supporterDb, { migrationsFolder: "drizzle/supporter" });
+      await migrate(supporterDb, { migrationsFolder: "drizzle/supporter" });
       logger.log("Migration supporter completed");
     } else {
       logger.log("Migration skipped: Database not initialized");

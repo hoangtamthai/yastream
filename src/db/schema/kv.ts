@@ -1,12 +1,12 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-export const kv = sqliteTable(
+import { bigint, index, integer, pgTable, text } from "drizzle-orm/pg-core";
+export const kv = pgTable(
   "kv",
   {
     key: text("key").primaryKey(),
     value: text("value").notNull(),
     size: integer("size"),
-    createdAt: integer("created_at").notNull(),
-    expiresAt: integer("expires_at").notNull(),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    expiresAt: bigint("expires_at", { mode: "number" }).notNull(),
   },
   (table) => [index("idx_kv_expires_at").on(table.expiresAt)],
 );

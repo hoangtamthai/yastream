@@ -225,17 +225,22 @@ export function handleError(
       logger.error(`${message} | ${error.message}`);
       return error;
     case error instanceof Error:
-      if (error.message.includes("lock")) {
+      const errMsg = error.message.toLowerCase();
+      if (
+        errMsg.includes("database is locked") ||
+        errMsg.includes("could not obtain lock") ||
+        errMsg.includes("deadlock")
+      ) {
         logger.error(`${message} | ${error.message}`);
         error.name = ErrorName.DB_LOCK;
         return error;
       }
-      if (error.message.includes("FOREIGN KEY")) {
+      if (errMsg.includes("foreign key")) {
         logger.warn(`${message} | ${error.message}`);
         error.name = ErrorName.DB_FOREIGN_KEY;
         return error;
       }
-      if (error.message.includes("UNIQUE")) {
+      if (errMsg.includes("unique")) {
         logger.warn(`${message} | ${error.message}`);
         error.name = ErrorName.DB_UNIQUE;
         return error;

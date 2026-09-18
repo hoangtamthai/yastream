@@ -1,8 +1,8 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { bigint, index, pgTable, text } from "drizzle-orm/pg-core";
 import { providerContent } from "./provider_content.js";
-import { unique } from "drizzle-orm/sqlite-core/unique-constraint";
+import { unique } from "drizzle-orm/pg-core/unique-constraint";
 
-export const stream = sqliteTable(
+export const stream = pgTable(
   "stream",
   {
     id: text("id").primaryKey(),
@@ -19,8 +19,8 @@ export const stream = sqliteTable(
     resolution: text("resolution"),
     size: text("size"),
     duration: text("duration"),
-    createdAt: integer("created_at").notNull(),
-    ttl: integer("ttl"),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [
     unique("uq_stream_url").on(table.url),

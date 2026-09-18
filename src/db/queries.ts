@@ -198,7 +198,7 @@ export async function upsertStream(
       .insert(stream)
       .values(rows)
       .onConflictDoUpdate({
-        target: stream.id,
+        target: stream.hash,
         set: {
           providerContentId: sql.raw(
             `excluded.${stream.providerContentId.name}`,
@@ -208,32 +208,10 @@ export async function upsertStream(
           season: sql.raw(`excluded.${stream.season.name}`),
           episode: sql.raw(`excluded.${stream.episode.name}`),
           url: sql.raw(`excluded.${stream.url.name}`),
-          // playlist: sql.raw(`excluded.${streams.playlist.name}`),
           hash: sql.raw(`excluded.${stream.hash.name}`),
           resolution: sql.raw(`excluded.${stream.resolution.name}`),
           size: sql.raw(`excluded.${stream.size.name}`),
           duration: sql.raw(`excluded.${stream.duration.name}`),
-          ttl: sql.raw(`excluded.${stream.ttl.name}`),
-        },
-      })
-      .onConflictDoUpdate({
-        target: stream.url,
-        set: {
-          season: sql.raw(`excluded.${stream.season.name}`),
-          createdAt: sql.raw(`excluded.${stream.createdAt.name}`),
-          ttl: sql.raw(`excluded.${stream.ttl.name}`),
-          // playlist: sql.raw(`excluded.${streams.playlist.name}`),
-          hash: sql.raw(`excluded.${stream.hash.name}`),
-          resolution: sql.raw(`excluded.${stream.resolution.name}`),
-          size: sql.raw(`excluded.${stream.size.name}`),
-          duration: sql.raw(`excluded.${stream.duration.name}`),
-        },
-      })
-      .onConflictDoUpdate({
-        target: stream.hash,
-        set: {
-          url: sql.raw(`excluded.${stream.url.name}`),
-          createdAt: sql.raw(`excluded.${stream.createdAt.name}`),
           ttl: sql.raw(`excluded.${stream.ttl.name}`),
         },
       });
@@ -311,16 +289,6 @@ export async function upsertSubtitles(
       .insert(subtitle)
       .values(rows)
       .onConflictDoUpdate({
-        target: subtitle.id,
-        set: {
-          url: sql.raw(`excluded.${subtitle.url.name}`),
-          season: sql.raw(`excluded.${subtitle.season.name}`),
-          episode: sql.raw(`excluded.${subtitle.episode.name}`),
-          subtitle: sql.raw(`excluded.${subtitle.subtitle.name}`),
-          ttl: sql.raw(`excluded.${subtitle.ttl.name}`),
-        },
-      })
-      .onConflictDoUpdate({
         target: [
           subtitle.providerContentId,
           subtitle.season,
@@ -329,7 +297,9 @@ export async function upsertSubtitles(
         ],
         set: {
           url: sql.raw(`excluded.${subtitle.url.name}`),
+          subtitle: sql.raw(`excluded.${subtitle.subtitle.name}`),
           createdAt: sql.raw(`excluded.${subtitle.createdAt.name}`),
+          ttl: sql.raw(`excluded.${subtitle.ttl.name}`),
         },
       });
     const row = rows[0];
@@ -408,5 +378,5 @@ async function cleanKvLimit() {
   if (!db) return;
 
   const result = await db.delete(kv).where(lt(kv.expiresAt, Date.now()));
-  console.log(`Cleaned ${result.rowsAffected} KV entries`);
+  console.log(`Cleaned ${result.rowCount} KV entries`);
 }

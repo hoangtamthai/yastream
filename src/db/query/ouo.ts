@@ -17,8 +17,7 @@ export async function upsertOuos(ouos: EOuoInsert[]) {
           originalUrl: sql.raw(`excluded.${ouo.originalUrl.name}`),
           redirectedUrl: sql.raw(`excluded.${ouo.redirectedUrl.name}`),
         },
-      })
-      .run();
+      });
   } catch (e) {
     handleError(e, logger, `Failed to upsert ouo`);
   }

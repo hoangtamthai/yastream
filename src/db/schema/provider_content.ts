@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { bigint, index, integer, pgTable, text } from "drizzle-orm/pg-core";
 import { content } from "./content.js";
 import { mkvdrama } from "./mkvdrama.js";
 
-export const providerContent = sqliteTable(
+export const providerContent = pgTable(
   "provider_content",
   {
     id: text("id").primaryKey(),
@@ -16,9 +16,9 @@ export const providerContent = sqliteTable(
       enum: ["movie", "series", "channel", "tv"],
     }).notNull(),
     image: text("image"),
-    createdAt: integer("created_at").notNull(),
-    updatedAt: integer("updated_at"),
-    ttl: integer("ttl"),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    updatedAt: bigint("updated_at", { mode: "number" }),
+    ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [
     index("idx_provider_content_external_id").on(

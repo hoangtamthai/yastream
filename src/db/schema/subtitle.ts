@@ -1,12 +1,12 @@
 import {
+  bigint,
   index,
-  integer,
-  sqliteTable,
+  pgTable,
   text,
   unique,
-} from "drizzle-orm/sqlite-core";
+} from "drizzle-orm/pg-core";
 import { providerContent } from "./provider_content.js";
-export const subtitle = sqliteTable(
+export const subtitle = pgTable(
   "subtitle",
   {
     id: text("id").primaryKey(),
@@ -18,8 +18,8 @@ export const subtitle = sqliteTable(
     url: text("url").notNull(),
     lang: text("lang").notNull(),
     subtitle: text("subtitle"),
-    createdAt: integer("created_at").notNull(),
-    ttl: integer("ttl"),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [
     unique("uq_subtitles_url").on(table.url),

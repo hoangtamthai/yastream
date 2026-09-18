@@ -1,42 +1,27 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-export const supporter = sqliteTable("supporter", {
-  // 1. Internal Relations
-  // id: text("id")
-  //   .primaryKey()
-  //   .$defaultFn(() => sql`(uuid())`), // Internal Unique ID
-  email: text("email").primaryKey(), // Backup identification mapping
-  // 2. Billing Provider References
+export const supporter = pgTable("supporter", {
+  email: text("email").primaryKey(),
   provider: text("provider", { enum: ["kofi", "stripe", "manual"] }).notNull(),
-  providerCustomerId: text("provider_customer_id"), // Stripe Customer ID or Ko-fi Email/Username
-  providerSubscriptionId: text("provider_subscription_id").unique(), // Stripe Sub ID or Ko-fi Transaction ID
+  providerCustomerId: text("provider_customer_id"),
+  providerSubscriptionId: text("provider_subscription_id").unique(),
 
-  // 3. Core Tier Details
-  tierName: text("tier_name").notNull(), // e.g., "Premium Tier", "Trial Tier"
+  tierName: text("tier_name").notNull(),
   status: text("status", {
     enum: ["active", "trialing", "past_due", "canceled", "expired"],
   })
     .notNull()
     .default("active"),
 
-  // 4. Access Window (Your backend reads these to grant access!)
-  currentPeriodStart: integer("current_period_start", {
-    mode: "timestamp",
-  }).notNull(),
-  currentPeriodEnd: integer("current_period_end", {
-    mode: "timestamp",
-  }).notNull(), // Access ends here
+  currentPeriodStart: timestamp("current_period_start", { mode: "date" })
+    .notNull()
+    .defaultNow(),
+  currentPeriodEnd: timestamp("current_period_end", { mode: "date" })
+    .notNull()
+    .defaultNow(),
 
-  // 5. Metadata / Automation Flags
-  cancelAtPeriodEnd: integer("cancel_at_period_end", { mode: "boolean" })
-    .notNull()
-    .default(false), // Did they hit cancel early?
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
 
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(new Date()),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });

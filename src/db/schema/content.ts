@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
-import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { bigint, integer, pgTable, text, unique } from "drizzle-orm/pg-core";
 import { providerContent } from "./provider_content.js";
-export const content = sqliteTable(
+export const content = pgTable(
   "content",
   {
     id: text("id").primaryKey(),
@@ -19,9 +19,9 @@ export const content = sqliteTable(
     background: text("background"),
     logo: text("logo"),
     genres: text("genres"),
-    createdAt: integer("created_at").notNull(),
-    updatedAt: integer("updated_at"),
-    ttl: integer("ttl"),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    updatedAt: bigint("updated_at", { mode: "number" }),
+    ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [
     unique("uq_content_imdb").on(table.imdbId, table.type),

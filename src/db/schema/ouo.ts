@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
-import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { bigint, pgTable, text, unique } from "drizzle-orm/pg-core";
 import { providerContent } from "./provider_content.js";
-export const ouo = sqliteTable("ouo", {
+export const ouo = pgTable("ouo", {
   id: text("id").primaryKey(),
   originalUrl: text("original_url").notNull(),
   redirectedUrl: text("redirected_url"),
   password: text("password"),
-  createdAt: integer("created_at").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
 export const ouoRelations = relations(ouo, ({ one }) => ({

@@ -8,7 +8,7 @@ const logger = new Logger("DB");
 export async function insertJobs(jobs: EJobInsert[]) {
   if (!db) return;
   try {
-    await db.insert(job).values(jobs).run();
+    await db.insert(job).values(jobs);
   } catch (e) {
     handleError(e, logger, `Failed to insert job ${jobs[0]?.id}`);
   }
@@ -25,8 +25,7 @@ export async function upsertJobs(jobs: EJobInsert[]) {
           status: sql.raw(`excluded.${job.status.name}`),
           data: sql.raw(`excluded.${job.data.name}`),
         },
-      })
-      .run();
+      });
   } catch (e) {
     handleError(e, logger, `Failed to upsert job`);
   }

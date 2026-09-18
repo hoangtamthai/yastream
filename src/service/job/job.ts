@@ -104,7 +104,7 @@ async function runCronJob() {
 export async function getJobQueue() {
   const count = await countJob();
   if (!count) return { total: 0, wait: 0 };
-  const total = count[0]?.count ?? 0;
+  const total = Number(count[0]?.count ?? 0);
   return { total, wait: Math.ceil(total * 0.5) };
 }
 

@@ -58,7 +58,7 @@ class SubtitleService {
   static async getTotalSubtitles() {
     const subtitles = await getCountSubtitles();
     if (!subtitles) return 0;
-    const total = subtitles[0]?.count ?? 0;
+    const total = Number(subtitles[0]?.count ?? 0);
     return total;
   }
 }

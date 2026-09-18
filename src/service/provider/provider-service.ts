@@ -25,7 +25,7 @@ class ProviderService {
   static async getTotalProviderContent() {
     const count = await getCountProviderContent();
     if (!count) return 0;
-    const total = count[0]?.count ?? 0;
+    const total = Number(count?.[0]?.count ?? 0);
     return total;
   }
 

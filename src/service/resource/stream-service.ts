@@ -142,7 +142,7 @@ class StreamService {
   static async getTotalStreams() {
     const streams = await getCountStream();
     if (!streams) return 0;
-    const total = streams[0]?.count ?? 0;
+    const total = Number(streams[0]?.count ?? 0);
     return total;
   }
 }

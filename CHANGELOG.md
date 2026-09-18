@@ -1,3 +1,11 @@
+# v0.11.0 2026-09-18
+
+- Change: migrate database from libsql (Turso) to PostgreSQL
+  - Drizzle dialect: sqlite -> postgresql, driver: @libsql/client -> pg (node-postgres)
+  - Epoch-ms timestamps now use bigint
+  - Legacy DATABASE_WRITE_TOKEN / DATABASE_READ_TOKEN env vars are ignored
+  - One-time data migration script: scripts/migrate-libsql-to-pg.mjs
+
 # v0.10.0 2026-07-21
 
 - Add: match ignore words (remove uncut, uncut version)
