@@ -1,6 +1,4 @@
-import { relations } from "drizzle-orm";
 import { bigint, integer, pgTable, text, unique } from "drizzle-orm/pg-core";
-import { providerContent } from "./provider_content.js";
 export const content = pgTable(
   "content",
   {
@@ -29,9 +27,6 @@ export const content = pgTable(
     unique("uq_content_tvdb").on(table.tvdbId, table.type),
   ],
 );
-export const contentRelations = relations(content, ({ many }) => ({
-  providerContent: many(providerContent),
-}));
 
 export type EContent = typeof content.$inferSelect;
 export type EContentInsert = typeof content.$inferInsert;

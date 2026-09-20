@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { bigint, pgTable, text } from "drizzle-orm/pg-core";
 import { ouo } from "./ouo.js";
 import { providerContent } from "./provider_content.js";
@@ -15,17 +14,6 @@ export const mkvdrama = pgTable("mkvdrama", {
   updatedAt: bigint("updated_at", { mode: "number" }),
   ttl: bigint("ttl", { mode: "number" }),
 });
-
-export const mkvdramaRelations = relations(mkvdrama, ({ one }) => ({
-  providerContent: one(providerContent, {
-    fields: [mkvdrama.providerContentId],
-    references: [providerContent.id],
-  }),
-  ouo: one(ouo, {
-    fields: [mkvdrama.ouoId],
-    references: [ouo.id],
-  }),
-}));
 
 export type EMkvdrama = typeof mkvdrama.$inferSelect;
 export type EMkvdramaInsert = typeof mkvdrama.$inferInsert;

@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { handleError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
 import { db } from "../drizzle.js";
@@ -18,7 +17,9 @@ export async function upsertMkvdrama(mkvdramas: EMkvdramaInsert[]) {
 export function getMkvdrama(providerContentId: string) {
   if (!db) return;
   const row = db.query.mkvdrama.findMany({
-    where: eq(mkvdrama.providerContentId, providerContentId),
+    where: {
+      providerContentId: providerContentId,
+    },
     with: {
       ouo: true,
     },

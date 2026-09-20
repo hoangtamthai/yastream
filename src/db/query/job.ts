@@ -1,4 +1,4 @@
-import { asc, count, eq, or, sql } from "drizzle-orm";
+import { asc, count, eq, sql } from "drizzle-orm";
 import { handleError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
 import { db } from "../drizzle.js";
@@ -60,8 +60,6 @@ export async function deleteJob(id: string) {
 
 export async function getJobById(id: string) {
   if (!db) return;
-  const row = db.query.job.findFirst({
-    where: eq(job.id, id),
-  });
+  const [row] = await db.select().from(job).where(eq(job.id, id)).limit(1);
   return row;
 }

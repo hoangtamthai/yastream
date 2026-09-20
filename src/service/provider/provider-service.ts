@@ -1,10 +1,10 @@
 import { ContentType } from "@stremio-addon/sdk";
+import { uuidv7 } from "uuidv7";
 import {
   getContentByTmdb,
   getContentJoinProviderById,
   getCountProviderContent,
   getProviderContentsById as getMatchContentProvider,
-  getProviderContent,
   getProviderContentById,
   upsertContent,
   upsertProviderContent,
@@ -12,14 +12,13 @@ import {
 import { Prefix } from "../../lib/manifest.js";
 import { ContentDetail, ContentId } from "../../source/meta.js";
 import { Provider } from "../../source/provider.js";
-import { extractTitle } from "../../utils/format.js";
 import { tmdb } from "../../source/tmdb.js";
 import { TTL_MS } from "../../utils/cache.js";
-import { uuidv7 } from "uuidv7";
+import { extractTitle } from "../../utils/format.js";
 
 class ProviderService {
   static async getProviderContent(id: string) {
-    return getProviderContent(id);
+    return getProviderContentById(id);
   }
 
   static async getTotalProviderContent() {

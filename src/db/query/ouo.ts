@@ -23,10 +23,8 @@ export async function upsertOuos(ouos: EOuoInsert[]) {
   }
 }
 
-export function getOuo(id: string) {
+export async function getOuo(id: string) {
   if (!db) return;
-  const row = db.query.ouo.findFirst({
-    where: eq(ouo.id, id),
-  });
+  const [row] = await db.select().from(ouo).where(eq(ouo.id, id)).limit(1);
   return row;
 }

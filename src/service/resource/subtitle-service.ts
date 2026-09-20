@@ -4,10 +4,9 @@ import {
   getSubtitle,
   getSubtitlesJoinProvider,
 } from "../../db/queries.js";
+import { cache } from "../../utils/cache.js";
 import { API, SUBTITLES } from "../../utils/constant.js";
 import { getOrigin } from "../../utils/domain.js";
-import { cache } from "../../utils/cache.js";
-import { ONETOUCHTV_HOST } from "../../source/onetouchtv.js";
 
 class SubtitleService {
   static async getSubtitle(id: string) {

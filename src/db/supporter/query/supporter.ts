@@ -4,8 +4,10 @@ import { supporter } from "../schema/supporter.js";
 
 export async function getSupporter(email: string) {
   if (!supporterDb) return;
-  const row = supporterDb.query.supporter.findFirst({
-    where: eq(supporter.email, email),
-  });
+  const [row] = await supporterDb
+    .select()
+    .from(supporter)
+    .where(eq(supporter.email, email))
+    .limit(1);
   return row;
 }

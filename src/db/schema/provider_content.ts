@@ -1,7 +1,5 @@
-import { relations } from "drizzle-orm";
 import { bigint, index, integer, pgTable, text } from "drizzle-orm/pg-core";
 import { content } from "./content.js";
-import { mkvdrama } from "./mkvdrama.js";
 
 export const providerContent = pgTable(
   "provider_content",
@@ -26,16 +24,6 @@ export const providerContent = pgTable(
       table.externalId,
     ),
   ],
-);
-export const providerContentRelations = relations(
-  providerContent,
-  ({ one, many }) => ({
-    content: one(content, {
-      fields: [providerContent.contentId],
-      references: [content.id],
-    }),
-    mkvdrama: many(mkvdrama),
-  }),
 );
 
 export type EProviderContent = typeof providerContent.$inferSelect;

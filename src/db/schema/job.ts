@@ -1,6 +1,4 @@
-import { relations } from "drizzle-orm";
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { providerContent } from "./provider_content.js";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export enum JOB_TYPE {
   MKVDRAMA_STREAM = "MKVDRAMA_STREAM",
@@ -21,14 +19,8 @@ export const job = pgTable("job", {
     enum: [JOB_TYPE.MKVDRAMA_STREAM, JOB_TYPE.MKVDRAMA_SCRAPE],
   }).notNull(),
   data: text("data").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
-
-export const jobRelations = relations(job, ({ one }) => ({
-  providerContent: one(providerContent),
-}));
 
 export type EJob = typeof job.$inferSelect;
 export type EJobInsert = typeof job.$inferInsert;

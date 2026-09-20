@@ -1,6 +1,7 @@
 import type { ContentType } from "@stremio-addon/sdk";
-import { and, count, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { and, count, eq, lt, sql } from "drizzle-orm";
 import type { ContentDetail } from "../source/meta.js";
+import { handleError } from "../utils/error.js";
 import { Logger } from "../utils/logger.js";
 import { db } from "./drizzle.js";
 import { content, EContentInsert, type EContent } from "./schema/content.js";
@@ -12,7 +13,6 @@ import {
 } from "./schema/provider_content.js";
 import { EStreamInsert, stream } from "./schema/stream.js";
 import { ESubtitleInsert, subtitle } from "./schema/subtitle.js";
-import { handleError } from "../utils/error.js";
 
 const logger = new Logger("DB");
 
@@ -78,7 +78,10 @@ export async function getContentByTmdb(
 ): Promise<EContent | undefined> {
   if (!db) return;
   const row = await db.query.content.findFirst({
-    where: and(eq(content.tmdbId, tmdbId), eq(content.type, type)),
+    where: {
+      tmdbId: tmdbId,
+      type: type,
+    },
   });
   return row;
 }
@@ -86,13 +89,9 @@ export async function getContentByTmdb(
 export async function getProviderContentsById(id: string) {
   if (!db) return;
   const rows = await db.query.content.findFirst({
-    where: inArray(
-      content.id,
-      db
-        .select({ contentId: providerContent.contentId })
-        .from(providerContent)
-        .where(and(eq(providerContent.id, id))),
-    ),
+    where: {
+      id: id,
+    },
     with: {
       providerContent: true,
     },
@@ -108,17 +107,20 @@ export async function getContentJoinProviderById(
 ) {
   if (!db) return;
   const row = await db.query.content.findFirst({
-    where: or(
-      imdbId
-        ? and(eq(content.imdbId, imdbId), eq(content.type, type))
-        : undefined,
-      tmdbId
-        ? and(eq(content.tmdbId, tmdbId.toString()), eq(content.type, type))
-        : undefined,
-      tvdbId
-        ? and(eq(content.tvdbId, tvdbId.toString()), eq(content.type, type))
-        : undefined,
-    ),
+    where: {
+      type: type,
+      OR: [
+        {
+          imdbId: imdbId,
+        },
+        {
+          tmdbId: tmdbId?.toString(),
+        },
+        {
+          tvdbId: tvdbId?.toString(),
+        },
+      ],
+    },
     with: {
       providerContent: true,
     },
@@ -162,19 +164,11 @@ export async function getProviderContentById(
   id: string,
 ): Promise<EProviderContent | undefined> {
   if (!db) return;
-  const row = await db.query.providerContent.findFirst({
-    where: eq(providerContent.id, id),
-  });
-  return row;
-}
-
-export async function getProviderContent(
-  id: string,
-): Promise<EProviderContent | undefined> {
-  if (!db) return;
-  const row = await db.query.providerContent.findFirst({
-    where: eq(providerContent.id, id),
-  });
+  const [row] = await db
+    .select()
+    .from(providerContent)
+    .where(eq(providerContent.id, id))
+    .limit(1);
   return row;
 }
 
@@ -231,9 +225,7 @@ export async function upsertStream(
 
 export async function getStream(id: string) {
   if (!db) return;
-  const row = await db.query.streams.findFirst({
-    where: eq(stream.id, id),
-  });
+  const [row] = await db.select().from(stream).where(eq(stream.id, id));
   return row;
 }
 export async function getStreamsJoinProvider(
@@ -317,9 +309,11 @@ export async function upsertSubtitles(
 }
 export async function getSubtitle(id: string) {
   if (!db) return;
-  const row = db.query.subtitles.findFirst({
-    where: eq(subtitle.id, id),
-  });
+  const [row] = await db
+    .select()
+    .from(subtitle)
+    .where(eq(subtitle.id, id))
+    .limit(1);
   return row;
 }
 export async function getSubtitlesJoinProvider(
