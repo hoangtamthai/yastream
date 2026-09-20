@@ -36,7 +36,7 @@
     "cheerio": "^1.2.0",
     "cron": "^4.4.0",
     "crypto-js": "^4.2.0",
-    "drizzle-orm": "^1.0.0-rc.4",
+    "drizzle-orm": "^1.0.0-rc.5-ab785fc",
     "fuse.js": "^7.5.0",
     "fuzzball": "^2.2.6",
     "hono": "^4.13.8",
@@ -57,7 +57,7 @@
     "@types/pg": "^8.23.1",
     "@types/probe-image-size": "^7.2.5",
     "dotenv": "^17.4.2",
-    "drizzle-kit": "^1.0.0-rc.4",
+    "drizzle-kit": "^1.0.0-rc.5-ab785fc",
     "jose": "^6.2.12",
     "typescript": "^6.0.3",
     "vitest": "^3.2.7"

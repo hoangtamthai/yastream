@@ -108,13 +108,13 @@ export async function getContentJoinProviderById(
       type: type,
       OR: [
         {
-          imdbId: imdbId,
+          imdbId: imdbId || "",
         },
         {
-          tmdbId: tmdbId?.toString(),
+          tmdbId: tmdbId?.toString() || "",
         },
         {
-          tvdbId: tvdbId?.toString(),
+          tvdbId: tvdbId?.toString() || "",
         },
       ],
     },
