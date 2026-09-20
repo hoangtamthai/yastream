@@ -1,4 +1,11 @@
-import { bigint, integer, pgTable, text, unique } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from "drizzle-orm/pg-core";
 export const content = pgTable(
   "content",
   {
@@ -17,8 +24,19 @@ export const content = pgTable(
     background: text("background"),
     logo: text("logo"),
     genres: text("genres"),
-    createdAt: bigint("created_at", { mode: "number" }).notNull(),
-    updatedAt: bigint("updated_at", { mode: "number" }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [

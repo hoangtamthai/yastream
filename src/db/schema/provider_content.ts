@@ -1,4 +1,11 @@
-import { bigint, index, integer, pgTable, text } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { content } from "./content.js";
 
 export const providerContent = pgTable(
@@ -14,8 +21,19 @@ export const providerContent = pgTable(
       enum: ["movie", "series", "channel", "tv"],
     }).notNull(),
     image: text("image"),
-    createdAt: bigint("created_at", { mode: "number" }).notNull(),
-    updatedAt: bigint("updated_at", { mode: "number" }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [

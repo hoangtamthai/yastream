@@ -18,9 +18,10 @@ import {
   upsertSubtitles,
 } from "../db/queries.js";
 import { EContent } from "../db/schema/content.js";
-import { EStreamInsert } from "../db/schema/stream.js";
+import { StreamInsert } from "../db/schema/stream.js";
 import { ESubtitleInsert } from "../db/schema/subtitle.js";
 import { Prefix, UserConfig } from "../lib/manifest.js";
+import ProviderService from "../service/provider/provider-service.js";
 import StreamService from "../service/resource/stream-service.js";
 import SubtitleService from "../service/resource/subtitle-service.js";
 import { axiosGet } from "../utils/axios.js";
@@ -45,7 +46,6 @@ import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
-import ProviderService from "../service/provider/provider-service.js";
 
 export interface SearchResult {
   id: number;
@@ -313,7 +313,7 @@ class KissKHScraperr extends BaseProvider {
           if (existingContent) {
             contentId = existingContent.id;
           } else {
-            upsertContent(contentId, tmdbDetail, TTL_MS.content);
+            await upsertContent(contentId, tmdbDetail, TTL_MS.content);
             upsertProviderContent({
               title: kissItem.title,
               ttl: TTL_MS.provider,
@@ -624,7 +624,7 @@ class KissKHScraperr extends BaseProvider {
         },
       },
     ];
-    const streamRow: Omit<EStreamInsert, "createdAt"> = {
+    const streamRow: StreamInsert = {
       id: uuidv7(),
       providerContentId: `${this.name}:${kisskhId}`,
       provider: this.name,

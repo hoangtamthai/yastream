@@ -34,7 +34,7 @@ class SubtitleService {
           url = SubtitleService.getSubtitleUrl(subtitle.subtitle.id);
         }
         const isExpired =
-          subtitle.subtitle.createdAt + (subtitle.subtitle.ttl ?? 0) <
+          subtitle.subtitle.createdAt.getTime() + (subtitle.subtitle.ttl ?? 0) <
           Date.now();
         if (isExpired) {
           return;

@@ -1,5 +1,5 @@
 import { uuidv7 } from "uuidv7";
-import { EStreamInsert } from "../../db/schema/stream.js";
+import { StreamInsert } from "../../db/schema/stream.js";
 import { UserConfig } from "../../lib/manifest.js";
 import { TTL_MS } from "../../utils/cache.js";
 import { cleanUrl } from "../../utils/format.js";
@@ -94,7 +94,7 @@ export function hosterToStream(
         const size = hosterData.size.toString();
         const streamResolution = toResolution(quality);
         const resolution = `${streamResolution.width}x${streamResolution.height}`;
-        const streamRow: Omit<EStreamInsert, "createdAt"> = {
+        const streamRow: StreamInsert = {
           id: uuidv7(),
           providerContentId,
           provider,

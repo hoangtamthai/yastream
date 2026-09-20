@@ -18,8 +18,10 @@ import {
 } from "../db/queries.js";
 import { EContent } from "../db/schema/content.js";
 import { EProviderContentInsert } from "../db/schema/provider_content.js";
-import { EStreamInsert } from "../db/schema/stream.js";
+import { StreamInsert } from "../db/schema/stream.js";
+import { SubtitleInsert } from "../db/schema/subtitle.js";
 import { Prefix, UserConfig } from "../lib/manifest.js";
+import ProviderService from "../service/provider/provider-service.js";
 import StreamService from "../service/resource/stream-service.js";
 import SubtitleService from "../service/resource/subtitle-service.js";
 import { axiosGet } from "../utils/axios.js";
@@ -40,7 +42,6 @@ import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
-import ProviderService from "../service/provider/provider-service.js";
 
 interface OnetouchtvTop {
   result: {
@@ -307,7 +308,7 @@ export class OnetouchtvScrapper extends BaseProvider {
             if (existingContent) {
               contentId = existingContent.id;
             } else {
-              upsertContent(contentId, tmdbDetail, TTL_MS.content);
+              await upsertContent(contentId, tmdbDetail, TTL_MS.content);
               upsertProviderContent({
                 ...providerContent,
                 contentId: contentId,
@@ -502,7 +503,7 @@ export class OnetouchtvScrapper extends BaseProvider {
       if (!episodeData) return [];
       const episodeParam = episodeData?.playId || episode?.toString() || "1";
       const episodeDetail = await this.getEpisode(episodeId, episodeParam);
-      const streamRows: Omit<EStreamInsert, "createdAt">[] = [];
+      const streamRows: StreamInsert[] = [];
       const streams = await Promise.all(
         episodeDetail.result.sources.map(async (source, index) => {
           const { playlist, url } = await this.getFinalPlaylist(source.url);
@@ -525,7 +526,7 @@ export class OnetouchtvScrapper extends BaseProvider {
             },
           };
           // Save stream to db
-          const streamRow: Omit<EStreamInsert, "createdAt"> = {
+          const streamRow: StreamInsert = {
             id: uuidv7(),
             providerContentId: `${this.name}:${detail.result.id}`,
             provider: this.name,
@@ -654,7 +655,7 @@ export class OnetouchtvScrapper extends BaseProvider {
               `Failed to get subtitle ${subtitle.url}`,
             );
           }
-          return {
+          const subtitleRow: SubtitleInsert = {
             ...subtitle,
             id: uuidv7(),
             season: "1",
@@ -663,11 +664,28 @@ export class OnetouchtvScrapper extends BaseProvider {
             // subtitle: subtitleContent,
             ttl: TTL_MS.stream,
           };
+          return subtitleRow;
         }),
       );
-      upsertSubtitles(subtitleRows);
+      const uniqueSubtitleRows = this._toUniqueSubtitles(subtitleRows);
+      upsertSubtitles(uniqueSubtitleRows);
     }
     return subtitles;
+  }
+
+  _toUniqueSubtitles(subtitles: SubtitleInsert[]) {
+    const uniqueSubtitles = subtitles.filter(
+      (subtitle, index, self) =>
+        index ===
+        self.findIndex(
+          (s) =>
+            s.providerContentId === subtitle.providerContentId &&
+            s.season === subtitle.season &&
+            s.episode === subtitle.episode &&
+            s.lang === subtitle.lang,
+        ),
+    );
+    return uniqueSubtitles;
   }
 
   async searchTitle(

@@ -3,6 +3,7 @@ import {
   index,
   pgTable,
   text,
+  timestamp,
   unique,
 } from "drizzle-orm/pg-core";
 import { providerContent } from "./provider_content.js";
@@ -18,7 +19,19 @@ export const subtitle = pgTable(
     url: text("url").notNull(),
     lang: text("lang").notNull(),
     subtitle: text("subtitle"),
-    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [
@@ -35,3 +48,5 @@ export const subtitle = pgTable(
 
 export type ESubtitle = typeof subtitle.$inferSelect;
 export type ESubtitleInsert = typeof subtitle.$inferInsert;
+
+export type SubtitleInsert = Omit<ESubtitleInsert, "createdAt">;

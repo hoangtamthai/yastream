@@ -17,14 +17,14 @@ import {
 } from "../db/query/mkvdrama.js";
 import { upsertOuos } from "../db/query/ouo.js";
 import { EJob, JOB_STATUS, JOB_TYPE } from "../db/schema/job.js";
-import { EOuo } from "../db/schema/ouo.js";
+import { EOuoInsert } from "../db/schema/ouo.js";
 import { Prefix, UserConfig } from "../lib/manifest.js";
 import {
   addJob,
   getJob,
   getJobQueue,
-  JobMkvdramaStream,
   JobMkvdramaScrape,
+  JobMkvdramaStream,
 } from "../service/job/job.js";
 import ProviderService from "../service/provider/provider-service.js";
 import StreamService from "../service/resource/stream-service.js";
@@ -498,7 +498,7 @@ export default class MkvdramaScraper extends BaseProvider {
     const providerContentId = `${this.name}:${mkvdramaId}`;
 
     const dbMkvdrama = await this.getDbMkvdrama(`${this.name}:${mkvdramaId}`);
-    let ouos: (EOuo & { quality: Quality })[] = [];
+    let ouos: (EOuoInsert & { quality: Quality })[] = [];
     if (dbMkvdrama && dbMkvdrama.length > 0) {
       dbMkvdrama.forEach((mkvdrama) => {
         const ouo = mkvdrama.ouo;
@@ -549,11 +549,10 @@ export default class MkvdramaScraper extends BaseProvider {
               break;
           }
           if (id && redirectedUrl) {
-            const ouo: EOuo & { quality: Quality } = {
+            const ouo: EOuoInsert & { quality: Quality } = {
               id,
               originalUrl,
               redirectedUrl,
-              createdAt: Date.now(),
               password: data.password,
               quality: link.quality as Quality,
             };
@@ -584,8 +583,6 @@ export default class MkvdramaScraper extends BaseProvider {
             providerContentId: providerContentId,
             ouoId: ouo.id,
             quality: ouo.quality,
-            createdAt: Date.now(),
-            updatedAt: null,
             ttl: TTL_MS.stream,
           };
         }),

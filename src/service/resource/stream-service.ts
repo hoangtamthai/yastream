@@ -50,7 +50,8 @@ class StreamService {
           // Violate Cloudflare's ToS if serve m3u8 stream
           // url = StreamService.getStreamUrl(stream.streams.id);
           const isExpired =
-            stream.stream.createdAt + (stream.stream.ttl ?? 0) < Date.now();
+            stream.stream.createdAt.getTime() + (stream.stream.ttl ?? 0) <
+            Date.now();
           if (url.includes(ONETOUCHTV_HOST) && isExpired) {
             return;
           }

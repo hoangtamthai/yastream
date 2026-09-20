@@ -11,7 +11,7 @@ import {
   providerContent,
   type EProviderContent,
 } from "./schema/provider_content.js";
-import { EStreamInsert, stream } from "./schema/stream.js";
+import { stream, StreamInsert } from "./schema/stream.js";
 import { ESubtitleInsert, subtitle } from "./schema/subtitle.js";
 
 const logger = new Logger("DB");
@@ -38,8 +38,6 @@ export async function upsertContent(
     background: contentData.thumbnail,
     logo: contentData.logo ?? null,
     genres: null,
-    createdAt: now,
-    updatedAt: null,
     ttl: Math.floor(ttlMs / 1000),
   };
 
@@ -62,7 +60,6 @@ export async function upsertContent(
           background: row.background,
           logo: row.logo,
           genres: row.genres,
-          updatedAt: now,
           ttl: row.ttl,
         },
       });
@@ -133,8 +130,7 @@ export async function upsertProviderContent(
   providerContentData: Omit<EProviderContentInsert, "createdAt" | "updatedAt">,
 ) {
   if (!db) return;
-  const now = Date.now();
-  const row = { ...providerContentData, createdAt: now, updatedAt: null };
+  const row = { ...providerContentData };
 
   try {
     await db
@@ -150,7 +146,6 @@ export async function upsertProviderContent(
           year: row.year,
           type: row.type,
           image: row.image,
-          updatedAt: now,
           ttl: row.ttl,
         },
       });
@@ -181,12 +176,10 @@ export async function getCountProviderContent() {
 }
 
 // STREAMS
-export async function upsertStream(
-  streamRow: Omit<EStreamInsert, "createdAt">[],
-) {
+export async function upsertStream(streamRow: StreamInsert[]) {
   if (!db) return;
   const now = Date.now();
-  const rows = streamRow.map((r) => ({ ...r, createdAt: now }));
+  const rows = streamRow.map((r) => ({ ...r }));
   try {
     await db
       .insert(stream)
@@ -272,7 +265,6 @@ export async function upsertSubtitles(
     season: subtitle.season,
     episode: subtitle.episode,
     subtitle: subtitle.subtitle,
-    createdAt: now,
     ttl: subtitle.ttl,
   }));
 

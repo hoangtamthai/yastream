@@ -1,6 +1,6 @@
-import { bigint, index, pgTable, text } from "drizzle-orm/pg-core";
-import { providerContent } from "./provider_content.js";
+import { bigint, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { unique } from "drizzle-orm/pg-core/unique-constraint";
+import { providerContent } from "./provider_content.js";
 
 export const stream = pgTable(
   "stream",
@@ -19,7 +19,19 @@ export const stream = pgTable(
     resolution: text("resolution"),
     size: text("size"),
     duration: text("duration"),
-    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     ttl: bigint("ttl", { mode: "number" }),
   },
   (table) => [
@@ -31,3 +43,5 @@ export const stream = pgTable(
 
 export type EStream = typeof stream.$inferSelect;
 export type EStreamInsert = typeof stream.$inferInsert;
+
+export type StreamInsert = Omit<EStreamInsert, "createdAt">;

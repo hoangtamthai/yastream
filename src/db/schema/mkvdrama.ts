@@ -1,4 +1,4 @@
-import { bigint, pgTable, text } from "drizzle-orm/pg-core";
+import { bigint, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { ouo } from "./ouo.js";
 import { providerContent } from "./provider_content.js";
 export const mkvdrama = pgTable("mkvdrama", {
@@ -10,8 +10,19 @@ export const mkvdrama = pgTable("mkvdrama", {
     .unique()
     .references(() => ouo.id),
   quality: text("quality").notNull(),
-  createdAt: bigint("created_at", { mode: "number" }).notNull(),
-  updatedAt: bigint("updated_at", { mode: "number" }),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "date",
+  })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "date",
+  })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
   ttl: bigint("ttl", { mode: "number" }),
 });
 

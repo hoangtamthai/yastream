@@ -19,7 +19,19 @@ export const job = pgTable("job", {
     enum: [JOB_TYPE.MKVDRAMA_STREAM, JOB_TYPE.MKVDRAMA_SCRAPE],
   }).notNull(),
   data: text("data").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "date",
+  })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "date",
+  })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export type EJob = typeof job.$inferSelect;

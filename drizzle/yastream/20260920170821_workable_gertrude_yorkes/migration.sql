@@ -12,8 +12,8 @@ CREATE TABLE "content" (
 	"background" text,
 	"logo" text,
 	"genres" text,
-	"created_at" bigint NOT NULL,
-	"updated_at" bigint,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"ttl" bigint,
 	CONSTRAINT "uq_content_imdb" UNIQUE("imdb_id","type"),
 	CONSTRAINT "uq_content_tmdb" UNIQUE("tmdb_id","type"),
@@ -25,7 +25,8 @@ CREATE TABLE "job" (
 	"status" text NOT NULL,
 	"type" text NOT NULL,
 	"data" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "kv" (
@@ -41,8 +42,8 @@ CREATE TABLE "mkvdrama" (
 	"provider_content_id" text NOT NULL,
 	"ouo_id" text UNIQUE,
 	"quality" text NOT NULL,
-	"created_at" bigint NOT NULL,
-	"updated_at" bigint,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"ttl" bigint
 );
 --> statement-breakpoint
@@ -51,7 +52,8 @@ CREATE TABLE "ouo" (
 	"original_url" text NOT NULL,
 	"redirected_url" text,
 	"password" text,
-	"created_at" bigint NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "provider_content" (
@@ -63,8 +65,8 @@ CREATE TABLE "provider_content" (
 	"year" integer NOT NULL,
 	"type" text NOT NULL,
 	"image" text,
-	"created_at" bigint NOT NULL,
-	"updated_at" bigint,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"ttl" bigint
 );
 --> statement-breakpoint
@@ -81,7 +83,8 @@ CREATE TABLE "stream" (
 	"resolution" text,
 	"size" text,
 	"duration" text,
-	"created_at" bigint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"ttl" bigint
 );
 --> statement-breakpoint
@@ -93,7 +96,8 @@ CREATE TABLE "subtitle" (
 	"url" text NOT NULL CONSTRAINT "uq_subtitles_url" UNIQUE,
 	"lang" text NOT NULL,
 	"subtitle" text,
-	"created_at" bigint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"ttl" bigint,
 	CONSTRAINT "uq_subtitles_provider_season_episode_lang" UNIQUE("provider_content_id","season","episode","lang")
 );
