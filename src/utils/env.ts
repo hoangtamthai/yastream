@@ -61,11 +61,7 @@ const envSchema = z.object({
   DATABASE_ENABLED: z.coerce.boolean().default(false),
   // Postgres connection string, e.g. postgresql://user:pass@host/db?sslmode=require (Neon/Supabase/self-hosted)
   DATABASE_URL: z.string().default(""),
-  // Legacy libsql auth tokens - ignored with Postgres, kept so old .env files still parse
-  DATABASE_WRITE_TOKEN: z.string().default(""),
-  DATABASE_READ_TOKEN: z.string().default(""),
   DATABASE_SUPPORTER_URL: z.string().default(""),
-  DATABASE_SUPPORTER_WRITE_TOKEN: z.string().default(""),
 
   // FlareSolverr
   FLARESOLVERR_URL: z.string().default(""),

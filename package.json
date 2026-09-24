@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.17",
-    "@libsql/client": "^0.17.4",
     "@stremio-addon/sdk": "github:hoangtamthai/stremio-addon-sdk#sdk",
     "@torbox/torbox-api": "^1.0.9",
     "@umami/node": "^0.4.0",

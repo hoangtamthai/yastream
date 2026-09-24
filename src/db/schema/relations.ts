@@ -13,7 +13,7 @@ export const relations = defineRelations(
     content: {
       providerContent: r.many.providerContent({
         from: r.content.id,
-        to: r.providerContent.id,
+        to: r.providerContent.contentId,
       }),
     },
     providerContent: {

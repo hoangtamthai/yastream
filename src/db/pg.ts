@@ -1,6 +1,8 @@
 import { Pool } from "pg";
 import { ENV } from "../utils/env.js";
+import { Logger } from "../utils/logger.js";
 
+const logger = new Logger("DB");
 class DatabaseManager {
   private pool: Pool | null = null;
   private supporter: Pool | null = null;
@@ -15,7 +17,7 @@ class DatabaseManager {
       });
       // Surface connection errors instead of silently dropping them
       this.pool.on("error", (err) => {
-        console.error(`[DB][E] PG pool error | ${err.message}`);
+        logger.error(`PG pool error | ${err.message}`);
       });
     }
 
@@ -27,7 +29,7 @@ class DatabaseManager {
         connectionTimeoutMillis: 15000,
       });
       this.supporter.on("error", (err) => {
-        console.error(`[DB][E] Supporter PG pool error | ${err.message}`);
+        logger.error(`PG Supporter pool error | ${err.message}`);
       });
     }
   }
