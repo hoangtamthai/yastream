@@ -282,9 +282,8 @@ export async function axiosHead<T>(
       return true;
     } catch (error) {
       lastError = error;
-      const isRateLimit =
-        error instanceof AxiosError &&
-        error.response?.status === HttpStatusCode.TooManyRequests;
+      const status = error instanceof AxiosError ? error.response?.status : undefined;
+      const isRateLimit = status === HttpStatusCode.TooManyRequests;
       if (!isRateLimit) break;
       const delay = ENV.RETRY_DELAY_MS * attempt;
       logger.log(`Retry ${attempt} HEAD | ${url}`);
@@ -297,7 +296,9 @@ export async function axiosHead<T>(
       await new Promise((r) => setTimeout(r, retryAfter));
     }
   }
-  logger.error(`Fail HEAD | ${url}, ${lastError}`);
+  if (!(lastError instanceof AxiosError && lastError.response?.status === HttpStatusCode.NotFound)) {
+    logger.error(`Fail HEAD | ${url}, ${lastError}`);
+  }
   cache.set(urlKey, false, 4 * 60 * 60 * 1000);
   return false;
 }

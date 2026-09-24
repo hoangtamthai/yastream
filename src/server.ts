@@ -45,7 +45,7 @@ app.onError((err, c) => {
 });
 
 // Start server
-initMigrations();
+await initMigrations();
 startCronJob();
 try {
   serve({ fetch: app.fetch, port: PORT, hostname: HOST }, () => {

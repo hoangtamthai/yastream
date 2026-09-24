@@ -645,16 +645,6 @@ export class OnetouchtvScrapper extends BaseProvider {
       cache.set(subtitleKey, subtitles, 4 * 60 * 60 * 1000);
       const subtitleRows = await Promise.all(
         subtitles.map(async (subtitle) => {
-          let subtitleContent: string | null = null;
-          try {
-            subtitleContent = await axiosGet<string>(subtitle.url);
-          } catch (error) {
-            handleError(
-              error,
-              this.logger,
-              `Failed to get subtitle ${subtitle.url}`,
-            );
-          }
           const subtitleRow: SubtitleInsert = {
             ...subtitle,
             id: uuidv7(),
