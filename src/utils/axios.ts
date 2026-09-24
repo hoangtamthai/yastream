@@ -146,7 +146,7 @@ function getClient(url: string) {
       return defaultClient;
   }
 }
-const customClients = [
+const cacheClients = [
   viewcrateClient,
   filecryptClient,
   decryptitClient,
@@ -223,7 +223,7 @@ export async function axiosGet<T>(
         const response = await http.get(url, axiosConfig);
         clearTimeout(timeoutId);
         const data = response.data;
-        if (customClients.includes(http)) {
+        if (cacheClients.includes(http)) {
           cache.set(urlKey, data, cacheMs);
         }
         return data as T;
@@ -233,6 +233,7 @@ export async function axiosGet<T>(
           error instanceof AxiosError && error.response?.status;
         isRateLimit =
           errorStatus === HttpStatusCode.TooManyRequests ||
+          errorStatus === HttpStatusCode.UnavailableForLegalReasons ||
           errorStatus === HttpStatusCode.Forbidden;
         if (http === onetouchtvClient) {
           logger.log(`Error ${(error as AxiosError).response?.data}`);
@@ -321,7 +322,7 @@ export async function axiosPost<T>(
     try {
       const response = await http.post(url, postData, config);
       const data = response.data;
-      if (customClients.includes(http)) {
+      if (cacheClients.includes(http)) {
         cache.set(urlKey, data, cacheMs);
       }
       return data as T;
