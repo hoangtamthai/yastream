@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { EStream } from "../db/schema/stream.js";
 import { axiosGet } from "./axios.js";
 import { handleError, ProbeInfoError } from "./error.js";
@@ -169,16 +169,39 @@ function isValidSegmentUrl(url: string) {
   }
 }
 
-function getProbeInfo(url: string): ProbeInfo | null {
+export function getFfprobeArgs(url: string): string[] {
+  return [
+    "-v",
+    "error",
+    "-select_streams",
+    "v:0",
+    "-show_entries",
+    "format=duration,size",
+    "-show_entries",
+    "stream=width,height,bit_rate",
+    "-of",
+    "json",
+    "-allowed_segment_extensions",
+    "ALL",
+    "-extension_picky",
+    "0",
+    url,
+  ];
+}
+
+export function getProbeInfo(url: string): ProbeInfo | null {
   try {
-    const cmd = `ffprobe -v error -select_streams v:0 -show_entries format=duration,size -show_entries stream=width,height,bit_rate -of json -allowed_segment_extensions ALL -extension_picky 0 "${url}"`;
-    const output = execSync(cmd, { timeout: 10000 }).toString();
+    const output = execFileSync("ffprobe", getFfprobeArgs(url), {
+      timeout: 10000,
+      stdio: ["ignore", "pipe", "ignore"],
+      shell: false,
+    }).toString();
     const data: ProbeInfo = JSON.parse(output);
     const size = (data.streams[0]?.bit_rate! * data.format.duration) / 8;
     data.format.size = size / (1024 * 1024 * 1024);
     return data;
-  } catch (err) {
-    throw new ProbeInfoError(`FFprobe failed | Url ${url}, Error: ${err}`);
+  } catch {
+    throw new ProbeInfoError("FFprobe failed");
   }
 }
 

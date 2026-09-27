@@ -176,10 +176,8 @@ export async function getCountProviderContent() {
 }
 
 // STREAMS
-export async function upsertStream(streamRow: StreamInsert[]) {
+export async function upsertStream(rows: StreamInsert[]) {
   if (!db) return;
-  const now = Date.now();
-  const rows = streamRow.map((r) => ({ ...r }));
   try {
     await db
       .insert(stream)

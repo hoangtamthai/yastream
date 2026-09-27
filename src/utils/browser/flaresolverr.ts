@@ -135,7 +135,7 @@ function getClient(): AxiosInstance | null {
         "Content-Type": "application/json",
         Authorization: `${ENV.FLARESOLVERR_AUTH_HEADER}`,
       },
-      timeout: 25000,
+      timeout: MAX_TIMEOUT,
     });
   }
   return client;

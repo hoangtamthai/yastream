@@ -100,7 +100,7 @@ const KISSKH_COUNTRY: Record<string, string> = {
   Philippine: "8",
 };
 
-class KissKHScraperr extends BaseProvider {
+export class KissKHScraperr extends BaseProvider {
   readonly urls = ENV.KISSKH_URLS;
   readonly baseUrl: string = "https://kisskh.co";
   getBaseUrl() {
@@ -916,5 +916,3 @@ export function markKisskhUrlFail(url: string): void {
   metrics.lastUsed = Date.now();
   kisskhMetrics.set(host, metrics);
 }
-
-export default KissKHScraperr;

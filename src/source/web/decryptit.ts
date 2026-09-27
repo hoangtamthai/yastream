@@ -19,6 +19,6 @@ export async function getUrlsFromDecryptit(dlcContent: string) {
     data,
   );
   if (!response) throw new DecryptitError("No response");
-  logger.log(`getUrlsFromDecryptit ${response.success.links}`);
+  logger.log(`getUrlsFromDecryptit ${response.success.links.length}`);
   return response.success.links;
 }

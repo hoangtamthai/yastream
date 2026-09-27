@@ -44,7 +44,7 @@ import { Quality } from "../utils/info.js";
 import { ntfy } from "../utils/notify/ntfy.js";
 import { EpisodeHoster, hosterToStream } from "./hoster/hoster.js";
 import { ContentDetail } from "./meta.js";
-import { BaseProvider, Provider } from "./provider.js";
+import { BaseProvider } from "./provider.js";
 import {
   FILECRYPT_HOST,
   FILECRYPT_ORIGIN,
@@ -98,7 +98,12 @@ const MKVDRAMA_COUNTRY: Record<string, string> = {
   Popular: "",
 };
 
-export default class MkvdramaScraper extends BaseProvider {
+export interface MkvdramaJobRunner {
+  runMkvdramaStream(job: EJob): Promise<void>;
+  runMkvdramaScrape(job: EJob): Promise<void>;
+}
+
+export class MkvdramaScraper extends BaseProvider {
   readonly baseUrl = MKVDRAMA_ORIGIN;
   readonly supportedPrefix: Prefix[] = [
     Prefix.IMDB,
@@ -191,10 +196,9 @@ export default class MkvdramaScraper extends BaseProvider {
       const streamKey = `streams:${type}:${configKey}:${this.name}:${id}:${season}:${episode}`;
       const cacheStreams: Stream[] = cache.get(streamKey);
       if (cacheStreams) return cacheStreams;
-
-      if (!mkvdramaId) {
-        mkvdramaId = (await this.getSearch(title, year, season))?.mkvdramaId;
-      }
+      // if (!mkvdramaId) {
+      //   mkvdramaId = (await this.getSearch(title, year, season))?.mkvdramaId;
+      // }
       if (!mkvdramaId) return [];
       const dbStreams = await StreamService.getDbStreams(
         `${this.name}:${mkvdramaId}`,
@@ -339,10 +343,9 @@ export default class MkvdramaScraper extends BaseProvider {
     try {
       const url = `${this.baseUrl}/${id}`;
       this.logger.log(`GET detail | ${url}`);
-      const response = await getFlareSolverr(url, this.name, 5);
-      console.log(response);
+      const response = await getFlareSolverr(url, this.name, 10);
       const content = response?.solution?.response || "";
-      if (!response || content.includes("Preparing...")) {
+      if (!response || content.includes("Loading download")) {
         this.logger.error(`Not found detail from id | ${id}`);
         return null;
       }
@@ -715,5 +718,3 @@ export default class MkvdramaScraper extends BaseProvider {
     return null;
   }
 }
-
-export const mkvdrama = new MkvdramaScraper(Provider.MKVDRAMA);

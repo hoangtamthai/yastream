@@ -32,6 +32,7 @@ export async function initMigrations() {
     //   logger.log("Migration skipped: Database not initialized");
     // }
   } catch (err) {
-    logger.log(`Migration skipped: ${err}`);
+    logger.error(`Migration failed: ${err}`);
+    throw err;
   }
 }

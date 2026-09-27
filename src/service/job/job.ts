@@ -1,7 +1,6 @@
 import { CronJob } from "cron";
 import {
   countJob,
-  deleteJob,
   getFirstJob,
   getJobById,
   insertJobs,
@@ -9,7 +8,7 @@ import {
 } from "../../db/query/job.js";
 import { EJob, EJobInsert, JOB_STATUS, JOB_TYPE } from "../../db/schema/job.js";
 import { ContentDetail } from "../../source/meta.js";
-import { mkvdrama } from "../../source/mkvdrama.js";
+import { MkvdramaJobRunner } from "../../source/mkvdrama.js";
 import { ENV } from "../../utils/env.js";
 import { handleError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
@@ -23,11 +22,17 @@ export interface JobMkvdramaScrape {
   pageUrl: string;
 }
 
+let mkvdramaRunner: MkvdramaJobRunner | undefined;
+
+export function registerMkvdramaJobRunner(runner: MkvdramaJobRunner) {
+  mkvdramaRunner = runner;
+}
+
 const logger = new Logger("JOB");
 
-export function addJob(job: EJobInsert) {
+export async function addJob(job: EJobInsert) {
   logger.log(`Add ${job.id}`);
-  insertJobs([job]);
+  await insertJobs([job]);
 }
 
 export function upsertJob(job: EJobInsert) {
@@ -61,7 +66,9 @@ async function runCronJob() {
     case JOB_TYPE.MKVDRAMA_STREAM:
       try {
         logger.log(`Running ${job.id}`);
-        await mkvdrama.runMkvdramaStream(job);
+        if (!mkvdramaRunner)
+          throw new Error("MKVDrama job runner is not registered");
+        await mkvdramaRunner.runMkvdramaStream(job);
       } catch (error: any) {
         handleError(error, logger, `Failed to run ${job.id}`);
         const data = JSON.parse(job.data);
@@ -79,7 +86,9 @@ async function runCronJob() {
     case JOB_TYPE.MKVDRAMA_SCRAPE:
       try {
         logger.log(`Running ${job.id}`);
-        await mkvdrama.runMkvdramaScrape(job);
+        if (!mkvdramaRunner)
+          throw new Error("MKVDrama job runner is not registered");
+        await mkvdramaRunner.runMkvdramaScrape(job);
       } catch (error: any) {
         handleError(error, logger, `Failed to run ${job.id}`);
         const data = JSON.parse(job.data);

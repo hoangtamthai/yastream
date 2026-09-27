@@ -3,8 +3,8 @@ import { defaultConfig } from "../../lib/manifest.js";
 import RedirectService from "../../service/redirect/redirect-service.js";
 import { isHosterUrl } from "../../source/hoster/hoster.js";
 import { OUO_HOSTS } from "../../source/web/ouo.js";
-import { decodeConfig } from "../router/stremio.js";
 import { extractHeaderInfo } from "../router/analytics.js";
+import { decodeConfig } from "../router/stremio.js";
 
 export const REDIRECT = "redirect";
 export async function redirectApiHandler(c: Context) {

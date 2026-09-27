@@ -66,7 +66,7 @@ const envSchema = z.object({
   // FlareSolverr
   FLARESOLVERR_URL: z.string().default(""),
   FLARESOLVERR_AUTH_HEADER: z.string().default(""),
-  FLARESOLVERR_MAX_TIMEOUT: z.coerce.number().default(30000),
+  FLARESOLVERR_MAX_TIMEOUT: z.coerce.number().default(60000),
   FLARESOLVERR_WAIT_IN_SECONDS: z.coerce.number().default(4),
 
   // Puppeteer
