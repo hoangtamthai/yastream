@@ -1,12 +1,12 @@
 import * as cheerio from "cheerio";
+import { getOuo } from "../../db/query/ouo.js";
 import {
   CMD,
   RequestPayload,
   sendFlareSolverr,
 } from "../../utils/browser/flaresolverr.js";
-import { Logger } from "../../utils/logger.js";
-import { getOuo } from "../../db/query/ouo.js";
 import { OuoError } from "../../utils/error.js";
+import { Logger } from "../../utils/logger.js";
 export const OUO_HOSTS = ["ouo.io", "ouo.press"];
 
 const logger = new Logger("OUO");
@@ -28,16 +28,26 @@ export async function getOuoFinalUrl(url: string, session: string = "ouo") {
     logger.debug(`currentUrl ${currentUrl}`);
     const payload: RequestPayload = {
       url: currentUrl,
-      cmd: cmd,
       maxTimeout: 20000,
-      waitInSeconds: 0,
-      session,
+      cmd: cmd,
+      // settleTimeout: 1000,
+      // captureResponses: ["*"],
+      // skipHttp: true,
+      // headers: {
+      //   "User-Agent":
+      //     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+      //   DNT: "1",
+      // },
     };
     if (postData) payload.postData = postData;
+    logger.debug(`payload ${JSON.stringify(payload)}`);
+    // const data = await sendTrawl(payload);
     const data = await sendFlareSolverr(payload);
     logger.trace(`data ${JSON.stringify(data)}`);
     const content = data?.solution?.response;
+    // logger.debug(`content ${data.url}, ${data.html}`);
     finalUrl = data?.solution?.url;
+    // logger.debug(`finalUrl ${finalUrl}`);
     // parse content
     if (!content) throw new OuoError("No content");
     if (!OUO_HOSTS.some((host) => finalUrl?.includes(host))) {
@@ -65,11 +75,12 @@ export async function getOuoFinalUrl(url: string, session: string = "ouo") {
     }
     if (!parseData.action) throw new OuoError("No redirect url or form action");
     currentUrl = parseData.action;
+    logger.debug(`parseData ${JSON.stringify(parseData)}`);
     cmd =
       parseData.method?.toUpperCase() === "POST"
         ? "request.post"
         : "request.get";
-    postData = `_token=${parseData.token}&cf-turnstile-response=${parseData.cfTurnstileResponse}&x-token=${parseData.xToken}&v-token=${parseData.vToken}`;
+    postData = `_token=${parseData.token}${parseData.cfTurnstileResponse ? `&cf-turnstile-response=${parseData.cfTurnstileResponse}` : ""}&x-token=${parseData.xToken || ""}${parseData.vToken ? `&v-token=${parseData.vToken}` : ""}`;
   }
   logger.log(`Final Url ${finalUrl}`);
   return finalUrl;
@@ -137,7 +148,9 @@ export async function getOuoFinalUrlBrowser(
         : "request.get";
     // application/x-www-form-urlencoded
     // const jsonPostData = JSON.stringify(parseData);
-    postData = `_token=${parseData.token}&cf-turnstile-response=${parseData.cfTurnstileResponse}&x-token=${parseData.xToken}&v-token=${parseData.vToken}`;
+    postData = `_token=${
+      parseData.token || ""
+    }&cf-turnstile-response=${parseData.cfTurnstileResponse || ""}&x-token=${parseData.xToken || ""}&v-token=${parseData.vToken || ""}&g-recaptcha-response=`;
   }
   logger.log(`Final Url ${finalUrl}`);
   return finalUrl;

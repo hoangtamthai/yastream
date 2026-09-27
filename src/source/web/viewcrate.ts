@@ -3,9 +3,9 @@ import * as crypto from "crypto";
 import { axiosGet, axiosPost } from "../../utils/axios.js";
 import { getFlareSolverr } from "../../utils/browser/flaresolverr.js";
 import { ViewcrateError } from "../../utils/error.js";
+import { Logger } from "../../utils/logger.js";
 import { EpisodeHoster, getHosterFromUrl, Hoster } from "../hoster/hoster.js";
 import { getUrlsFromDecryptit } from "./decryptit.js";
-import { USER_AGENT } from "../../utils/constant.js";
 
 interface ViewcrateCnl {
   crypted: string;
@@ -13,6 +13,7 @@ interface ViewcrateCnl {
 }
 export const VIEWCRATE_HOST = "viewcrate.cc";
 export const VIEWCRATE_ORIGIN = `https://${VIEWCRATE_HOST}`;
+const logger = new Logger("VIEWCRATE");
 
 /** Sometimes miss links */
 export async function getUrlsFromViewcrate(url: string) {
@@ -26,27 +27,14 @@ export async function getUrlsFromViewcrate(url: string) {
 
 /** Has all links */
 export async function getUrlsFromViewcrateDlc(url: string, password?: string) {
+  logger.log(`GET viewcrate dlc | ${url}`);
   // need to load js to have episodes
   // const html = await axiosGet<string>(url);
   const response = await getFlareSolverr(url, "viewcrate", 2);
-  const cookies = response?.solution?.cookies;
-  const userAgent = response?.solution?.userAgent;
   const html = response?.solution?.response;
   if (!html) throw new ViewcrateError("No html");
   if (html.toLowerCase().includes("protected content")) {
     throw new ViewcrateError("Protected content");
-    // const { csrfToken, postUrl } = getProtectedContent(html);
-    // const postData = `csrf_token=${csrfToken}&password=${password}`;
-    // const response = await axiosPost<string>(postUrl, postData, {
-    //   headers: {
-    //     Cookie: cookies?.map((c) => `${c.name}=${c.value}`).join("; "),
-    //     "User-Agent": userAgent || USER_AGENT,
-    //     "Content-Type": "application/x-www-form-urlencoded",
-    //     Accept:
-    //       "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    //     "Accept-Encoding": "gzip, deflate, br, zstd",
-    //   },
-    // });
   }
   const link = await getDlcUrl(html);
   if (!link) throw new ViewcrateError("No dlc link");

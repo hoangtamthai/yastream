@@ -8,7 +8,6 @@ import publicRouter from "./api/router/public.js";
 import stremio from "./api/router/stremio.js";
 import { initMigrations } from "./db/drizzle.js";
 import { buildManifest } from "./lib/manifest.js";
-import { startCronJob } from "./service/job/job.js";
 import { API } from "./utils/constant.js";
 import { ENV } from "./utils/env.js";
 import { Logger } from "./utils/logger.js";
@@ -46,7 +45,6 @@ app.onError((err, c) => {
 
 // Start server
 await initMigrations();
-startCronJob();
 try {
   serve({ fetch: app.fetch, port: PORT, hostname: HOST }, () => {
     logger.log(`yastream running on http://${HOST}:${PORT}`);
