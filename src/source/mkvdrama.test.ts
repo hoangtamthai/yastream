@@ -5,6 +5,7 @@
 import * as cheerio from "cheerio";
 import { describe, expect, it } from "vitest";
 import { defaultConfig } from "../lib/manifest.js";
+import StreamService from "../service/resource/stream-service.js";
 import {
   CMD,
   getFlareSolverr,
@@ -13,10 +14,9 @@ import {
   sendFlareSolverr,
 } from "../utils/browser/flaresolverr.js";
 import { getPixeldrainDownloadUrl } from "./hoster/pixeldrain.js";
-import MkvdramaScraper from "./mkvdrama.js";
+import { MkvdramaScraper } from "./mkvdrama.js";
 import { Provider } from "./provider.js";
 import { decodeViewcrateToken, getUrlsFromViewcrate } from "./web/viewcrate.js";
-import StreamService from "../service/resource/stream-service.js";
 
 const mkvdrama = new MkvdramaScraper(Provider.MKVDRAMA);
 

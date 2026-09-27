@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import MkvdramaScraper from "../../source/mkvdrama.js";
+import { MkvdramaScraper } from "../../source/mkvdrama.js";
 import { Provider } from "../../source/provider.js";
 import { getFlareSolverr } from "./flaresolverr.js";
 import { getRedirectedUrlCDP } from "./puppeteer.js";
