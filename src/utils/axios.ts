@@ -7,15 +7,20 @@ import axios, {
 } from "axios";
 import EventEmitter from "events";
 import https from "https";
-import { GOFILE_API_ORIGIN, GOFILE_ORIGIN } from "../source/hoster/gofile.js";
-import { MKVDRAMA_ORIGIN } from "../source/mkvdrama.js";
 import { decryptString } from "../source/onetouchtv-crypto.js";
-import { DECRYPTIT_HOST, DECRYPTIT_ORIGIN } from "../source/web/decryptit.js";
-import { FILECRYPT_ORIGIN } from "../source/web/filecrypt.js";
-import { VIEWCRATE_ORIGIN } from "../source/web/viewcrate.js";
 import { FlareSolverrCookie, getFlareSolverr } from "./browser/flaresolverr.js";
 import { cache, TTL_MS } from "./cache.js";
-import { ONETOUCHTV_ORIGIN, USER_AGENT } from "./constant.js";
+import {
+  DECRYPTIT_HOST,
+  DECRYPTIT_ORIGIN,
+  FILECRYPT_ORIGIN,
+  GOFILE_API_ORIGIN,
+  GOFILE_ORIGIN,
+  MKVDRAMA_ORIGIN,
+  ONETOUCHTV_ORIGIN,
+  USER_AGENT,
+  VIEWCRATE_ORIGIN,
+} from "./constant.js";
 import { ENV } from "./env.js";
 import { FlareSolverrError, RateLimitError } from "./error.js";
 import { Logger } from "./logger.js";
@@ -283,7 +288,8 @@ export async function axiosHead<T>(
       return true;
     } catch (error) {
       lastError = error;
-      const status = error instanceof AxiosError ? error.response?.status : undefined;
+      const status =
+        error instanceof AxiosError ? error.response?.status : undefined;
       const isRateLimit = status === HttpStatusCode.TooManyRequests;
       if (!isRateLimit) break;
       const delay = ENV.RETRY_DELAY_MS * attempt;
@@ -297,7 +303,12 @@ export async function axiosHead<T>(
       await new Promise((r) => setTimeout(r, retryAfter));
     }
   }
-  if (!(lastError instanceof AxiosError && lastError.response?.status === HttpStatusCode.NotFound)) {
+  if (
+    !(
+      lastError instanceof AxiosError &&
+      lastError.response?.status === HttpStatusCode.NotFound
+    )
+  ) {
     logger.error(`Fail HEAD | ${url}, ${lastError}`);
   }
   cache.set(urlKey, false, 4 * 60 * 60 * 1000);

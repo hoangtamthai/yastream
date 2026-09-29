@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import * as crypto from "crypto";
 import { axiosGet, axiosPost } from "../../utils/axios.js";
 import { getFlareSolverr } from "../../utils/browser/flaresolverr.js";
+import { VIEWCRATE_ORIGIN } from "../../utils/constant.js";
 import { ViewcrateError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
 import { EpisodeHoster, getHosterFromUrl, Hoster } from "../hoster/hoster.js";
@@ -11,8 +12,6 @@ interface ViewcrateCnl {
   crypted: string;
   jk: string;
 }
-export const VIEWCRATE_HOST = "viewcrate.cc";
-export const VIEWCRATE_ORIGIN = `https://${VIEWCRATE_HOST}`;
 const logger = new Logger("VIEWCRATE");
 
 /** Sometimes miss links */

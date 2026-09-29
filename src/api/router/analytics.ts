@@ -25,6 +25,34 @@ export function extractHeaderInfo(c: Context) {
   return { ip, country, url, origin, userAgent };
 }
 
+export function getRemainingText(
+  remaining: number,
+  resource: ShortManifestResource,
+) {
+  let minutes = ENV.CATALOG_WINDOW_MINUTES;
+  switch (resource) {
+    case "catalog":
+      minutes = ENV.CATALOG_WINDOW_MINUTES;
+      break;
+    case "meta":
+      minutes = ENV.META_WINDOW_MINUTES;
+      break;
+    case "stream":
+      minutes = ENV.STREAM_WINDOW_MINUTES;
+      break;
+    case "subtitles":
+      minutes = ENV.SUBTITLES_WINDOW_MINUTES;
+      break;
+  }
+  const ratio = remaining / minutes;
+  if (ratio > 0.66) {
+    return "HIGH";
+  } else if (ratio > 0.33) {
+    return "MEDIUM";
+  }
+  return "LOW";
+}
+
 if (ENV.PROMETHEUS_ENABLED) {
   analytics.get("/metrics", async (c) => {
     return c.text(await prometheusClient.register.metrics(), 200, {

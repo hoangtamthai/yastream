@@ -1,7 +1,6 @@
+import { PIXELDRAIN_ORIGIN } from "../../utils/constant.js";
 import { cleanUrl } from "../../utils/format.js";
 
-export const PIXELDRAIN_HOST = "pixeldrain.com";
-export const PIXELDRAIN_ORIGIN = `https://${PIXELDRAIN_HOST}`;
 export function filterPixeldrainUrls(urls: string[]) {
   return urls
     .filter((url) => url.includes(PIXELDRAIN_ORIGIN))

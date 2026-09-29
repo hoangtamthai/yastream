@@ -13,7 +13,7 @@ type CacheValue = {
 export const TTL_SECS = {
   content: 24 * 60 * 60,
   provider: 4 * 60 * 60,
-  stream: 1 * 60 * 60,
+  stream: 0.5 * 60 * 60,
 };
 export const TTL_MS = {
   content: TTL_SECS.content * 1000,

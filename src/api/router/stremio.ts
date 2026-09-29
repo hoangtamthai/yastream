@@ -28,7 +28,7 @@ import { hashMD5 } from "../../utils/crypto.js";
 import { getOrigin } from "../../utils/domain.js";
 import { ENV } from "../../utils/env.js";
 import { Logger } from "../../utils/logger.js";
-import { extractHeaderInfo } from "./analytics.js";
+import { extractHeaderInfo, getRemainingText } from "./analytics.js";
 
 const logger = new Logger("SERVER");
 
@@ -58,13 +58,14 @@ const getLimiter = (
       windowMs: windowMs,
       limit: limit,
       keyGenerator: (c) => {
-        const { ip, userAgent } = extractHeaderInfo(c);
+        const { ip } = extractHeaderInfo(c);
         const key = `${ip}`;
         return key;
       },
       handler: (c) => {
         const { ip, userAgent } = extractHeaderInfo(c);
         const remaining = c.res.headers.get("RateLimit-Reset") ?? "5";
+        const remainingText = getRemainingText(parseInt(remaining), resource);
         const description = getDescription(parseInt(remaining));
         logger.warn(
           `Rate limit | Resource: ${resource}, IP: ${ip}, Wait: ${remaining}s`,
@@ -73,7 +74,7 @@ const getLimiter = (
         resourceRatelimit?.inc({
           resource,
           key,
-          wait: remaining,
+          wait: remainingText,
         });
         const limitResponse = getResourceLimitResponse(resource, description);
         return c.json({ ...limitResponse, retryAfter: remaining }, 200);

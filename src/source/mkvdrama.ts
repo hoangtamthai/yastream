@@ -35,8 +35,14 @@ import {
 } from "../utils/browser/flaresolverr.js";
 import { getRedirectedUrlCDP } from "../utils/browser/puppeteer.js";
 import { cache, TTL_MS } from "../utils/cache.js";
+import {
+  FILECRYPT_HOST,
+  FILECRYPT_ORIGIN,
+  MKVDRAMA_ORIGIN,
+  VIEWCRATE_HOST,
+  VIEWCRATE_ORIGIN,
+} from "../utils/constant.js";
 import { getOrigin } from "../utils/domain.js";
-import { ENV } from "../utils/env.js";
 import { handleError, MkvdramaError, OuoError } from "../utils/error.js";
 import { extractTitle } from "../utils/format.js";
 import { matchTitle } from "../utils/fuse.js";
@@ -45,17 +51,9 @@ import { ntfy } from "../utils/notify/ntfy.js";
 import { EpisodeHoster, hosterToStream } from "./hoster/hoster.js";
 import { ContentDetail } from "./meta.js";
 import { BaseProvider } from "./provider.js";
-import {
-  FILECRYPT_HOST,
-  FILECRYPT_ORIGIN,
-  getUrlsFromFilecrypt,
-} from "./web/filecrypt.js";
+import { getUrlsFromFilecrypt } from "./web/filecrypt.js";
 import { getOuoFinalUrl, getOuoId, OUO_HOSTS } from "./web/ouo.js";
-import {
-  getUrlsFromViewcrateDlc,
-  VIEWCRATE_HOST,
-  VIEWCRATE_ORIGIN,
-} from "./web/viewcrate.js";
+import { getUrlsFromViewcrateDlc } from "./web/viewcrate.js";
 interface MkvdramaSeries {
   id: string;
   title: string;
@@ -85,7 +83,7 @@ interface MkvdramaEpisode {
 }
 
 // export const MKVDRAMA_HOST = "mkvdrama.net";
-export const MKVDRAMA_ORIGIN = ENV.MKVDRAMA_URL;
+export { MKVDRAMA_ORIGIN } from "../utils/constant.js";
 // export const MKVDRAMA_HOST
 const BEST_QUALITIES = ["2160p", "1080pHD", "1080p"];
 
@@ -103,7 +101,7 @@ export interface MkvdramaJobRunner {
   runMkvdramaScrape(job: EJob): Promise<void>;
 }
 
-export class MkvdramaScraper extends BaseProvider {
+export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
   readonly baseUrl = MKVDRAMA_ORIGIN;
   readonly supportedPrefix: Prefix[] = [
     Prefix.IMDB,

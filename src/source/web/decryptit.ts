@@ -1,4 +1,5 @@
 import { axiosPost } from "../../utils/axios.js";
+import { DECRYPTIT_ORIGIN } from "../../utils/constant.js";
 import { DecryptitError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
 
@@ -10,8 +11,6 @@ interface DecryptitResponse {
 }
 const logger = new Logger("DECRYPTIT");
 
-export const DECRYPTIT_HOST = "dcrypt.it";
-export const DECRYPTIT_ORIGIN = `http://${DECRYPTIT_HOST}`;
 export async function getUrlsFromDecryptit(dlcContent: string) {
   const data = `content=${encodeURIComponent(dlcContent)}`;
   const response = await axiosPost<DecryptitResponse>(

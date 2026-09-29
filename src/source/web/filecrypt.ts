@@ -1,13 +1,11 @@
 import * as cheerio from "cheerio";
 import { axiosGet } from "../../utils/axios.js";
 import { getFlareSolverr } from "../../utils/browser/flaresolverr.js";
+import { FILECRYPT_ORIGIN } from "../../utils/constant.js";
 import { FilecryptError, handleError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
 import { EpisodeHoster, getHosterFromUrl, Hoster } from "../hoster/hoster.js";
 import { getUrlsFromDecryptit } from "./decryptit.js";
-
-export const FILECRYPT_HOST = "filecrypt.cc";
-export const FILECRYPT_ORIGIN = `https://${FILECRYPT_HOST}`;
 
 const session = "filecrypt";
 const logger = new Logger("FILECRYPT");

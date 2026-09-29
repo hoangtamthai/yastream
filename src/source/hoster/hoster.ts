@@ -2,15 +2,19 @@ import { uuidv7 } from "uuidv7";
 import { StreamInsert } from "../../db/schema/stream.js";
 import { UserConfig } from "../../lib/manifest.js";
 import { TTL_MS } from "../../utils/cache.js";
+import {
+  GOFILE_HOST,
+  MEGA_HOST,
+  PIXELDRAIN_HOST,
+  VIKING_HOST,
+} from "../../utils/constant.js";
 import { cleanUrl } from "../../utils/format.js";
 import { Quality, toResolution } from "../../utils/info.js";
 import { Logger } from "../../utils/logger.js";
 import { getMediaflowproxyTranscodeUrl } from "../../utils/mediaflowproxy.js";
 import { getTorboxStreamUrl } from "../debrid/torbox.js";
 import { Provider } from "../provider.js";
-import { GOFILE_HOST } from "./gofile.js";
-import { MEGA_HOST } from "./mega.js";
-import { getPixeldrainDownloadUrl, PIXELDRAIN_HOST } from "./pixeldrain.js";
+import { getPixeldrainDownloadUrl } from "./pixeldrain.js";
 import { getSendDownloadUrl, SEND_HOSTS } from "./send.js";
 
 export interface EpisodeHoster {
@@ -27,6 +31,7 @@ export const enum Hoster {
   GOFILE = "gofile",
   SEND = "send",
   MEGA = "mega",
+  VIKING = "viking",
 }
 
 export function filterHosterUrlsFromUrls(urls: string[]) {
@@ -122,6 +127,8 @@ export function getHosterFromUrl(url: string) {
       return Hoster.GOFILE;
     case url.includes(MEGA_HOST):
       return Hoster.MEGA;
+    case url.includes(VIKING_HOST):
+      return Hoster.VIKING;
     case SEND_HOSTS.some((host) => url.includes(host)):
       return Hoster.SEND;
     default:
@@ -146,6 +153,8 @@ export async function getHosterDownloadUrl(url: string, config: UserConfig) {
     case Hoster.GOFILE:
       return "";
     case Hoster.MEGA:
+      return "";
+    case Hoster.VIKING:
       return "";
     default:
       return url;

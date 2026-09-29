@@ -4,11 +4,10 @@
 import { load } from "cheerio";
 import puppeteer, { CookieData, Handler, Page } from "puppeteer";
 import { OUO_HOSTS } from "../../source/web/ouo.js";
-import { USER_AGENT } from "../constant.js";
+import { PIXELDRAIN_HOST, USER_AGENT } from "../constant.js";
 import { ENV } from "../env.js";
 import { handleError } from "../error.js";
 import { Logger } from "../logger.js";
-import { PIXELDRAIN_HOST } from "../../source/hoster/pixeldrain.js";
 
 const logger = new Logger("PUPPETEER");
 const FINAL_HOSTS = [...OUO_HOSTS, PIXELDRAIN_HOST];

@@ -12,7 +12,6 @@ import {
   getHosterFromUrl,
   isHosterUrl,
 } from "../../source/hoster/hoster.js";
-import { ONETOUCHTV_HOST } from "../../source/onetouchtv.js";
 import { API, STREAMS, TICKCOUNTER_HOST } from "../../utils/constant.js";
 import { getOrigin } from "../../utils/domain.js";
 import { extractSeason, formatStreamTitle } from "../../utils/format.js";
@@ -50,16 +49,11 @@ class StreamService {
           // Violate Cloudflare's ToS if serve m3u8 stream
           // url = StreamService.getStreamUrl(stream.streams.id);
           const isExpired =
-            stream.stream.createdAt.getTime() + (stream.stream.ttl ?? 0) <
+            stream.stream.updatedAt.getTime() + (stream.stream.ttl ?? 0) <
             Date.now();
-          if (url.includes(ONETOUCHTV_HOST) && isExpired) {
+          if (url.includes(TICKCOUNTER_HOST) || isExpired) {
             return;
           }
-          if (url.includes(TICKCOUNTER_HOST)) {
-            return;
-          }
-          // }
-
           let info: StreamInfo = parseInfo(stream.stream);
           const hasFullInfo: boolean =
             info.resolution !== undefined &&

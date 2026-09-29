@@ -1,8 +1,14 @@
+# v0.11.1 2026-09-30
+
+- Change: reduce cache time for stream and subtitle to 30 minutes
+- Change: move constants to constant.ts
+- Change: analytics use high, medium and low wait time
+
 # v0.11.0 2026-09-24
 
 - Change: migrate database from libsql (Turso) to PostgreSQL for stability
-- Epoch-ms timestamps now use bigint
-- Remove DATABASE_WRITE_TOKEN / DATABASE_READ_TOKEN env vars are ignored
+- Change: Epoch-ms timestamps now use bigint
+- Remove: DATABASE_WRITE_TOKEN / DATABASE_READ_TOKEN env vars are ignored
 
 # v0.10.1 2026-07-21
 

@@ -1,12 +1,9 @@
 import { UserConfig } from "../../lib/manifest.js";
 import { axiosGet } from "../../utils/axios.js";
+import { GOFILE_API_ORIGIN, GOFILE_ORIGIN } from "../../utils/constant.js";
 import { cleanUrl } from "../../utils/format.js";
 
 interface GofileContent {}
-export const GOFILE_HOST = "gofile.io";
-export const GOFILE_ORIGIN = `https://${GOFILE_HOST}`;
-export const GOFILE_API_ORIGIN = `https://api.${GOFILE_HOST}`;
-
 export function filterGofileUrls(urls: string[]) {
   return urls
     .filter((url) => url.includes(GOFILE_ORIGIN))
