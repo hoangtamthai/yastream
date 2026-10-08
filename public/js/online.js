@@ -1,6 +1,4 @@
-async function getOnlineUser() {
-  const baseUrl = "https://umami-fs.tamthai.de";
-  const shareId = "DNYrFJkPhnGRFHB3";
+async function getOnlineUser(baseUrl, shareId) {
   const response = await fetch(`${baseUrl}/api/share/${shareId}`);
   const data = await response.json();
   const token = data.token;
@@ -23,4 +21,3 @@ async function getOnlineUser() {
   return online;
 }
 
-getOnlineUser();

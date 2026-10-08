@@ -51,6 +51,7 @@ const envSchema = z.object({
   // Analytics
   UMAMI_ENABLED: z.coerce.boolean().default(false),
   UMAMI_WEBSITE_ID: z.string().default(""),
+  UMAMI_SHARE_ID: z.string().default(""),
   UMAMI_URL: z.url().default(""),
   PROMETHEUS_ENABLED: z.coerce.boolean().default(false),
 

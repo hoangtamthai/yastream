@@ -24,8 +24,7 @@
     <link rel="icon" href="/img/yas.png">
     <link rel="stylesheet" href="/css/style.css">
     <!-- Umami tracking -->
-    <script defer src="{{UMAMI_URL}}"
-        data-website-id="{{UMAMI_WEBSITE_ID}}"></script>
+    <script defer src="{{UMAMI_URL}}" data-website-id="{{UMAMI_WEBSITE_ID}}"></script>
     <!-- Tom Select https://tom-select.js.org/ -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.5.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.5.2/dist/js/tom-select.complete.min.js"></script>
@@ -333,8 +332,7 @@
                     <a target="_blank" rel="noopener noreferrer"
                         href="https://uptime-fs.tamthai.de/status/yastream">Status
                     </a>
-                    <a target="_blank" rel="noopener noreferrer"
-                        href="https://umami-fs.tamthai.de/share/DNYrFJkPhnGRFHB3">
+                    <a target="_blank" rel="noopener noreferrer" href="{{UMAMI_URL}}/share/{{UMAMI_SHARE_ID}}">
                         <span class="online-dot"></span><span id="active">Online</span>
                     </a>
                 </div>
@@ -360,8 +358,10 @@
 
     <span style="display: none;" id="defaultConfig">{{DEFAULT_CONFIG}}</span>
     <script src="/js/landing.js"></script>
-    <script src="/js/input.js"></script>
     <script src="/js/online.js"></script>
+    <script>
+        getOnlineUser("{{UMAMI_URL}}", "{{UMAMI_SHARE_ID}}");
+    </script>
 </body>
 
 </html>

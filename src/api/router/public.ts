@@ -22,8 +22,9 @@ const getLandingPage = () => {
   cachedLandingHtml = fs
     .readFileSync(filePath, "utf8")
     .replace("{{VERSION}}", pkg.version)
-    .replace("{{UMAMI_URL}}", ENV.UMAMI_URL)
-    .replace("{{UMAMI_WEBSITE_ID}}", ENV.UMAMI_WEBSITE_ID)
+    .replaceAll("{{UMAMI_URL}}", ENV.UMAMI_URL)
+    .replaceAll("{{UMAMI_WEBSITE_ID}}", ENV.UMAMI_WEBSITE_ID)
+    .replaceAll("{{UMAMI_SHARE_ID}}", ENV.UMAMI_SHARE_ID)
     .replace("{{CHANGELOG}}", mdToHtml(changelog))
     .replace("{{DEFAULT_CONFIG}}", JSON.stringify(defaultConfig));
 
