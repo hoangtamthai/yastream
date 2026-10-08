@@ -39,6 +39,7 @@ export function filterHosterUrlsFromUrls(urls: string[]) {
   let gofileUrls: string[] = [];
   let sendUrls: string[] = [];
   let megaUrls: string[] = [];
+  let vikingUrls: string[] = [];
   urls.forEach((url) => {
     switch (true) {
       case url.includes(PIXELDRAIN_HOST):
@@ -50,6 +51,9 @@ export function filterHosterUrlsFromUrls(urls: string[]) {
       case url.includes(MEGA_HOST):
         megaUrls.push(cleanUrl(url));
         break;
+      case url.includes(VIKING_HOST):
+        vikingUrls.push(cleanUrl(url));
+        break;
       case SEND_HOSTS.some((host) => url.includes(host)):
         sendUrls.push(cleanUrl(url));
         break;
@@ -59,9 +63,10 @@ export function filterHosterUrlsFromUrls(urls: string[]) {
   });
   logger.log(`PIXELDRAIN ${pixeldrainUrls.length}`);
   logger.log(`GOFILE ${gofileUrls.length}`);
-  logger.log(`SEND ${sendUrls.length}`);
   logger.log(`MEGA ${megaUrls.length}`);
-  return { pixeldrainUrls, gofileUrls, sendUrls, megaUrls };
+  logger.log(`VIKING ${vikingUrls.length}`);
+  logger.log(`SEND ${sendUrls.length}`);
+  return { pixeldrainUrls, gofileUrls, megaUrls, vikingUrls, sendUrls };
 }
 
 export function hosterToStream(
@@ -73,7 +78,7 @@ export function hosterToStream(
   externalId: string,
   season: string,
 ) {
-  const { pixeldrainUrls, gofileUrls, sendUrls, megaUrls } =
+  const { pixeldrainUrls, gofileUrls, megaUrls, vikingUrls, sendUrls } =
     filterHosterUrlsFromUrls(urls.flat());
   const streamRows = episodes
     .map((episode) => {
@@ -87,11 +92,14 @@ export function hosterToStream(
           case Hoster.GOFILE:
             url = gofileUrls.shift()!;
             break;
-          case Hoster.SEND:
-            url = sendUrls.shift()!;
-            break;
           case Hoster.MEGA:
             url = megaUrls.shift()!;
+            break;
+          case Hoster.VIKING:
+            url = vikingUrls.shift()!;
+            break;
+          case Hoster.SEND:
+            url = sendUrls.shift()!;
             break;
           default:
             break;

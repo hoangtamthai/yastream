@@ -1,3 +1,9 @@
+# v0.11.2 2026-10-07
+
+- Add: support vikings links for mkvdrama
+- Add: database replica support
+- Change: use umami analytics from env
+
 # v0.11.1 2026-09-30
 
 - Change: reduce cache time for stream and subtitle to 30 minutes

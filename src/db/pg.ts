@@ -5,19 +5,33 @@ import { Logger } from "../utils/logger.js";
 const logger = new Logger("DB");
 class DatabaseManager {
   private pool: Pool | null = null;
+  private replicaPool: Pool | null = null;
   private supporter: Pool | null = null;
 
-  constructor(url: string) {
+  constructor() {
     if (ENV.DATABASE_URL) {
       this.pool = new Pool({
-        connectionString: url,
+        connectionString: ENV.DATABASE_URL,
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 15000,
       });
       // Surface connection errors instead of silently dropping them
       this.pool.on("error", (err) => {
-        logger.error(`PG pool error | ${err.message}`);
+        logger.error(`pool error | ${err.message}`);
+      });
+    }
+
+    if (ENV.DATABASE_REPLICA_URL) {
+      this.replicaPool = new Pool({
+        connectionString: ENV.DATABASE_REPLICA_URL,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 15000,
+      });
+      // Surface connection errors instead of silently dropping them
+      this.replicaPool.on("error", (err) => {
+        logger.error(`replica pool error | ${err.message}`);
       });
     }
 
@@ -37,6 +51,9 @@ class DatabaseManager {
   public getDb(): Pool | null {
     return this.pool;
   }
+  public getDbReplica(): Pool | null {
+    return this.replicaPool;
+  }
 
   public getSupporterDb(): Pool | null {
     return this.supporter;
@@ -48,6 +65,6 @@ class DatabaseManager {
   }
 }
 
-const pg = ENV.DATABASE_ENABLED ? new DatabaseManager(ENV.DATABASE_URL) : null;
+const pg = ENV.DATABASE_ENABLED ? new DatabaseManager() : null;
 
 export { pg };

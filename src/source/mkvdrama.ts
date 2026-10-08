@@ -567,7 +567,7 @@ export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
         if (redirect) ouos.push(redirect);
       });
       if (ouos.length === 0) throw new OuoError("No ouo links found");
-      upsertOuos(ouos);
+      const upsertOuosPromise = upsertOuos(ouos);
 
       const syncContent = { ...content, title: detail.name };
       if (detail.poster) syncContent.thumbnail = detail.poster;
@@ -576,7 +576,7 @@ export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
         mkvdramaId,
         this.name,
       );
-
+      await upsertOuosPromise;
       upsertMkvdramas(
         ouos.map((ouo) => {
           return {

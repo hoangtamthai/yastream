@@ -50,8 +50,8 @@ const envSchema = z.object({
 
   // Analytics
   UMAMI_ENABLED: z.coerce.boolean().default(false),
-  UMAMI_WEBSITE_ID: z.string().default("f4af25ed-caf9-4fe2-ae07-7f0d50f5a51c"),
-  UMAMI_URL: z.url().default("https://umami-fs.tamthai.de"),
+  UMAMI_WEBSITE_ID: z.string().default(""),
+  UMAMI_URL: z.url().default(""),
   PROMETHEUS_ENABLED: z.coerce.boolean().default(false),
 
   // Notification
@@ -61,6 +61,7 @@ const envSchema = z.object({
   DATABASE_ENABLED: z.coerce.boolean().default(false),
   // Postgres connection string, e.g. postgresql://user:pass@host/db?sslmode=require (Neon/Supabase/self-hosted)
   DATABASE_URL: z.string().default(""),
+  DATABASE_REPLICA_URL: z.string().default(""),
   DATABASE_SUPPORTER_URL: z.string().default(""),
 
   // FlareSolverr

@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { withReplicas } from "drizzle-orm/pg-core";
 import { Logger } from "../utils/logger.js";
 import { pg } from "./pg.js";
 import { relations } from "./schema/relations.js";
@@ -8,7 +9,17 @@ import { relations as supporterRelations } from "./supporter/schema/relations.js
 const logger = new Logger("DB");
 
 const pool = pg?.getDb();
-const db = pool ? drizzle({ client: pool, relations: relations }) : null;
+const replicaPool = pg?.getDbReplica();
+const db = pool
+  ? replicaPool
+    ? withReplicas(
+        drizzle({ client: pool, relations }),
+        [
+          drizzle({ client: replicaPool, relations }),
+        ],
+      )
+    : drizzle({ client: pool, relations })
+  : null;
 
 const supporterDbClient = pg?.getSupporterDb();
 const supporterDb = supporterDbClient
