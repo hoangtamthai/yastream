@@ -25,6 +25,7 @@ const envSchema = z.object({
   // Server configuration
   DOMAIN: z.string().default("localhost"),
   PORT: z.coerce.number().default(55913),
+  USER_AGENT: z.coerce.string().default("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"),
   CACHE_SIZE_MB: z.coerce.number().default(100),
   // Retry configuration
   RETRY_ATTEMPTS: z.coerce.number().default(2),
@@ -92,13 +93,10 @@ const envSchema = z.object({
   JOB_ENABLED: z.coerce.boolean().default(false),
   JOB_CRON: z.string().default(`*/30 * * * * *`),
   // JOB_SCRAPE_CRON: z.string().default(`* */1 * * * *`),
-
   // Debrid service
   TORBOX_TIMEOUT_MS: z.coerce.number().default(10000),
-
   // Hoster
   GOFILE_TOKEN: z.string().default(""),
-
   // Kisskh domains
   KISSKH_URLS: z
     .string()
@@ -106,7 +104,6 @@ const envSchema = z.object({
     .pipe(z.array(z.url()))
     .default(["https://kisskh.co", "https://kisskh.do"]),
   KISSKH_USE_FLARESOLVERR: z.coerce.boolean().default(false),
-
   // Mkvdrama
   MKVDRAMA_URL: z.string().default("https://mkvdrama.net"),
 });

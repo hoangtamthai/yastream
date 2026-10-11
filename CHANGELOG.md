@@ -1,3 +1,7 @@
+# v0.11.3 2026-10-07
+
+- Change: USER_AGENT to ENV
+
 # v0.11.2 2026-10-07
 
 - Add: support vikings links for mkvdrama

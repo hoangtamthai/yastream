@@ -2,7 +2,6 @@ import { ContentType } from "@stremio-addon/sdk";
 import { AxiosRequestConfig } from "axios";
 import { URLSearchParams } from "url";
 import { axiosGet } from "../utils/axios.js";
-import { USER_AGENT } from "../utils/constant.js";
 import { ENV } from "../utils/env.js";
 import { handleError, TmdbError } from "../utils/error.js";
 import { extractTitle } from "../utils/format.js";
@@ -398,7 +397,7 @@ class TMDBService extends BaseMeta {
     url = getProxyUrl(url);
     const config: AxiosRequestConfig = {
       headers: {
-        "User-Agent": USER_AGENT,
+        "User-Agent": ENV.USER_AGENT,
         Authorization: "Bearer " + this.apiKey,
         "Content-Type": "application/json",
       },

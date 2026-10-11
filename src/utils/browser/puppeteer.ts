@@ -4,7 +4,7 @@
 import { load } from "cheerio";
 import puppeteer, { CookieData, Handler, Page } from "puppeteer";
 import { OUO_HOSTS } from "../../source/web/ouo.js";
-import { PIXELDRAIN_HOST, USER_AGENT } from "../constant.js";
+import { PIXELDRAIN_HOST } from "../constant.js";
 import { ENV } from "../env.js";
 import { handleError } from "../error.js";
 import { Logger } from "../logger.js";
@@ -47,7 +47,7 @@ export async function getPuppeteerRequest(
   browser.setCookie(...(cookies || []));
   const page = await browser.newPage();
   let html = "";
-  page.setUserAgent({ userAgent: userAgent || USER_AGENT });
+  page.setUserAgent({ userAgent: userAgent || ENV.USER_AGENT });
   try {
     await page.goto(url, {
       waitUntil: "networkidle0",
@@ -147,7 +147,7 @@ export async function postRedirectedUrlCDP(
   if (cookies) browser.setCookie(...cookies);
   try {
     const page: Page = await browser.newPage();
-    page.setUserAgent({ userAgent: userAgent || USER_AGENT });
+    page.setUserAgent({ userAgent: userAgent || ENV.USER_AGENT });
     await page.setRequestInterception(true);
     const client = await page.createCDPSession();
     await client.send("Network.enable");
@@ -242,7 +242,7 @@ export async function getRedirectedUrlCDP(
   if (cookies) browser.setCookie(...cookies);
   try {
     const page: Page = await browser.newPage();
-    page.setUserAgent({ userAgent: userAgent || USER_AGENT });
+    page.setUserAgent({ userAgent: userAgent || ENV.USER_AGENT });
     const client = await page.createCDPSession();
     await client.send("Network.enable");
     let redirectLocation: string | undefined;

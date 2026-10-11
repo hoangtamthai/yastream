@@ -18,7 +18,6 @@ import {
   GOFILE_ORIGIN,
   MKVDRAMA_ORIGIN,
   ONETOUCHTV_ORIGIN,
-  USER_AGENT,
   VIEWCRATE_ORIGIN,
 } from "./constant.js";
 import { ENV } from "./env.js";
@@ -55,7 +54,7 @@ function createClient(
 }
 
 const defaultClient = createClient({
-  "User-Agent": USER_AGENT,
+  "User-Agent": ENV.USER_AGENT,
   Accept: "application/json",
   "Accept-Language": "en-US,en;q=0.5",
   "Accept-Encoding": "gzip, deflate",
@@ -64,21 +63,21 @@ const defaultClient = createClient({
 });
 
 const viewcrateClient = createClient({
-  "User-Agent": USER_AGENT,
+  "User-Agent": ENV.USER_AGENT,
   Accept: "text/html",
   Origin: VIEWCRATE_ORIGIN,
   Referer: VIEWCRATE_ORIGIN,
 });
 
 const filecryptClient = createClient({
-  "User-Agent": USER_AGENT,
+  "User-Agent": ENV.USER_AGENT,
   Accept: "text/html",
   Origin: FILECRYPT_ORIGIN,
   Referer: FILECRYPT_ORIGIN,
 });
 
 const decryptitClient = createClient({
-  "User-Agent": USER_AGENT,
+  "User-Agent": ENV.USER_AGENT,
   Accept: "application/json, text/javascript, */*",
   "Accept-Language": "en-US,en;q=0.5",
   "X-Requested-With": "XMLHttpRequest",
@@ -89,7 +88,7 @@ const decryptitClient = createClient({
 });
 
 const gofileClient = createClient({
-  "User-Agent": USER_AGENT,
+  "User-Agent": ENV.USER_AGENT,
   Accept: "application/json",
   Origin: GOFILE_ORIGIN,
   Connection: "keep-alive",
@@ -101,7 +100,7 @@ const gofileClient = createClient({
 
 const kisskhClient = createClient(
   {
-    "User-Agent": USER_AGENT,
+    "User-Agent": ENV.USER_AGENT,
     Accept: "application/json",
   },
   getWebshareProxyConfig(),
@@ -112,7 +111,7 @@ const onetouchtvHost = Buffer.from("YXBpMy5kZXZjb3JwLm1l=", "base64").toString(
 );
 const onetouchtvClient = createClient(
   {
-    "User-Agent": USER_AGENT,
+    "User-Agent": ENV.USER_AGENT,
     Accept: "*/*",
     Origin: ONETOUCHTV_ORIGIN,
     Referer: ONETOUCHTV_ORIGIN,
@@ -125,7 +124,7 @@ onetouchtvClient.interceptors.response.use((response) => {
 });
 
 const mkvdramaClient = createClient({
-  "User-Agent": USER_AGENT,
+  "User-Agent": ENV.USER_AGENT,
   Accept: "text/html",
   Origin: MKVDRAMA_ORIGIN,
   Referer: MKVDRAMA_ORIGIN,
