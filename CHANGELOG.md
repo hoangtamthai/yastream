@@ -2,6 +2,7 @@
 
 - Change: USER_AGENT to ENV
 - Fix: use proxy for playlist fetch
+- Update: github workflow latest action
 
 # v0.11.2 2026-10-07
 
