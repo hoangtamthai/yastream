@@ -46,6 +46,7 @@ import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
+import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 
 export interface SearchResult {
   id: number;
@@ -104,7 +105,7 @@ export class KissKHScraperr extends BaseProvider {
   readonly urls = ENV.KISSKH_URLS;
   readonly baseUrl: string = "https://kisskh.co";
   getBaseUrl() {
-    return getKisskhBaseUrl();
+    return selectKisskhUrl();
   }
   readonly supportedPrefix: Prefix[] = [
     Prefix.IMDB,
@@ -302,9 +303,13 @@ export class KissKHScraperr extends BaseProvider {
             type,
             fallbackUrl: tmdbDetail.thumbnail || poster,
           };
+          if (tmdbDetail.tmdbId) {
+            id = `${Prefix.TMDB}:${tmdbDetail.tmdbId}`;
+          }
           if (tmdbDetail.imdbId) {
             posterParam.prefix = Prefix.IMDB;
             posterParam.id = tmdbDetail.imdbId;
+            id = `${tmdbDetail.imdbId}`;
           }
           poster = await getPosterUrl(posterParam, config);
 
@@ -562,11 +567,8 @@ export class KissKHScraperr extends BaseProvider {
     content: ContentDetail,
     config: UserConfig,
   ): Promise<Stream[]> {
-    const { episode, id, season, year, type } = content;
-    const { episodeId, kisskhDetail } = await this._getEpisode(
-      kisskhId,
-      episode,
-    );
+    const { episode, season, year } = content;
+    const { episodeId } = await this._getEpisode(kisskhId, episode);
     const token = await this._getToken(episodeId, this.viGuid);
     const stream = await this._getStream(episodeId, token);
     if (!stream) return [];
@@ -578,36 +580,6 @@ export class KissKHScraperr extends BaseProvider {
       kisskhId.toString(),
       this.name,
     );
-    // const tmdbDetail = await tmdb.searchDetail(content.title, type);
-    // if (tmdbDetail) {
-    //   const oldContent = await getContentByTmdb(tmdbDetail.id, type);
-    //   if (oldContent) {
-    //     const contentId = oldContent.id;
-    //     upsertContent(contentId, tmdbDetail, TTL_MS.content);
-    //     const providerContent = await getProviderContentById(
-    //       `${Prefix.KISSKH}:${kisskhId}`,
-    //     );
-    //     if (providerContent) {
-    //       upsertProviderContent({
-    //         ...providerContent,
-    //         title: kisskhDetail.title,
-    //         contentId: contentId,
-    //       });
-    //     } else {
-    //       upsertProviderContent({
-    //         id: `${Prefix.KISSKH}:${kisskhId}`,
-    //         contentId: contentId,
-    //         title: kisskhDetail.title,
-    //         ttl: null,
-    //         provider: this.name,
-    //         externalId: kisskhId.toString(),
-    //         image: kisskhDetail.thumbnail,
-    //         year: year,
-    //         type: type,
-    //       });
-    //     }
-    //   }
-    // }
     // Handle rate limit
     if (stream.Video.includes(RATE_LIMIT_DESCRIPTION))
       throw new RateLimitError(content.title);
@@ -644,7 +616,7 @@ export class KissKHScraperr extends BaseProvider {
       streamRow.duration = (info.hours * 60 + info.minutes).toString();
     }
     if (url.includes("m3u8")) {
-      const playlist = await axiosGet<string>(url);
+      const playlist = await axiosGet<string>(url, getWebshareProxyConfig());
       if (playlist) {
         // streamRow.playlist = playlist;
         streamRow.hash = hashSHA256(playlist);
@@ -658,7 +630,10 @@ export class KissKHScraperr extends BaseProvider {
 
   private async _getToken(episodeId: string, uid: string): Promise<string> {
     if (!this.tokenJsCode) {
-      const html = await axiosGet<string>(this.getBaseUrl() + "/index.html");
+      const html = await axiosGet<string>(
+        this.getBaseUrl() + "/index.html",
+        getWebshareProxyConfig(),
+      );
       if (!html)
         throw new KisskhTokenError(
           `Failed to fetch index.html for token generation`,
@@ -667,6 +642,7 @@ export class KissKHScraperr extends BaseProvider {
       const scriptSrc = $('script[src*="common"]').attr("src");
       const jsCode = await axiosGet<string>(
         this.getBaseUrl() + "/" + scriptSrc,
+        getWebshareProxyConfig(),
       );
       this.tokenJsCode = jsCode;
     }
@@ -853,7 +829,7 @@ interface UrlMetrics {
 
 const kisskhMetrics = new Map<string, UrlMetrics>();
 
-function selectKisskhUrl(): string {
+export function selectKisskhUrl(): string {
   for (const url of ENV.KISSKH_URLS) {
     const metrics = kisskhMetrics.get(url);
     if (!metrics || metrics.fail === 0) {
@@ -886,10 +862,6 @@ export function getKisskhMetrics(): Map<string, UrlMetrics> {
  */
 export function resetKisskhMetrics(): void {
   kisskhMetrics.clear();
-}
-
-export function getKisskhBaseUrl(): string {
-  return selectKisskhUrl();
 }
 
 export function markKisskhUrlSuccess(url: string): void {

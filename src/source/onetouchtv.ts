@@ -42,6 +42,7 @@ import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
+import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 
 interface OnetouchtvTop {
   result: {
@@ -241,14 +242,12 @@ export class OnetouchtvScrapper extends BaseProvider {
         this.logger.log(`GET catalog | ${topUrl}`);
         const data = await axiosGet<OnetouchtvTop>(topUrl);
         if (!data) return [];
-        // const data: OnetouchtvTop = decryptString(encryptedData);
         filteredData = data.result.day;
       } else {
         const url = `${this.baseUrl}/vod/home`;
         this.logger.log(`GET catalog | ${url}`);
         const data = await axiosGet<OnetouchtvHome>(url);
         if (!data) return [];
-        // const data: OnetouchtvHome = decryptString(encryptedData);
         filteredData = data.result.recents.filter(
           (item) => item.country === catalogType,
         );
@@ -262,21 +261,15 @@ export class OnetouchtvScrapper extends BaseProvider {
       const metas = await Promise.all(
         filteredData.map(async (item, index) => {
           const onetouchtvId = `${Prefix.ONETOUCHTV}:${item.id}`;
-          const metaDetail: MetaDetail = {
-            id: onetouchtvId,
-            name: item.title,
-            poster: item.image,
-            background: item.image,
-            type: type,
-          };
           const tmdbDetail = tmdbDetails[index];
           let poster = item.image;
+          let id = onetouchtvId;
           // Use TMDB/RPDB if available
           const providerContent: Omit<
             EProviderContentInsert,
             "createdAt" | "updatedAt"
           > = {
-            id: onetouchtvId,
+            id: id,
             contentId: null,
             title: item.title,
             ttl: TTL_MS.provider,
@@ -300,6 +293,7 @@ export class OnetouchtvScrapper extends BaseProvider {
             if (tmdbDetail.imdbId) {
               posterParam.prefix = Prefix.IMDB;
               posterParam.id = tmdbDetail.imdbId;
+              id = `${tmdbDetail.imdbId}`;
             }
             poster = await getPosterUrl(posterParam, config);
             // Save content to DB
@@ -319,6 +313,13 @@ export class OnetouchtvScrapper extends BaseProvider {
             // not found tmdb
             upsertProviderContent(providerContent);
           }
+          const metaDetail: MetaDetail = {
+            id: id,
+            name: item.title,
+            poster: item.image,
+            background: item.image,
+            type: type,
+          };
           metaDetail.poster = poster;
           if (type === "movie") {
             metaDetail.behaviorHints = {
@@ -573,7 +574,7 @@ export class OnetouchtvScrapper extends BaseProvider {
       const maxAttempts = 2;
       while (attempts < maxAttempts) {
         this.logger.log(`GET playlist | ${playlistUrl}`);
-        playlist = await axiosGet<string>(playlistUrl);
+        playlist = await axiosGet<string>(playlistUrl, getWebshareProxyConfig());
         if (!playlist) break;
         if (!playlist.includes(ONETOUCHTV_HOST)) {
           break;

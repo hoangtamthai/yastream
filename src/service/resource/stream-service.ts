@@ -74,11 +74,7 @@ class StreamService {
                 info.minutes
               ).toString();
             }
-            upsertStream([
-              {
-                ...stream.stream,
-              },
-            ]);
+            upsertStream([{ ...stream.stream }]);
           }
           season = extractSeason(stream.provider_content.title).season ?? 1;
           const description = formatStreamTitle(

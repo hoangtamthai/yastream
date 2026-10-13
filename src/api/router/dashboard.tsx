@@ -3,7 +3,7 @@ import { tailwind } from "hono-tailwind";
 import ProviderService from "../../service/provider/provider-service.js";
 import StreamService from "../../service/resource/stream-service.js";
 import SubtitleService from "../../service/resource/subtitle-service.js";
-import { getKisskhBaseUrl, getKisskhMetrics } from "../../source/kisskh.js";
+import { getKisskhMetrics, selectKisskhUrl } from "../../source/kisskh.js";
 import { cache } from "../../utils/cache.js";
 import { ENV } from "../../utils/env.js";
 
@@ -190,7 +190,7 @@ dashboard.get("/", async (c) => {
             <div class="flex flex-wrap gap-3 mb-4">
               <MetricBadge
                 label="Current URL"
-                value={getKisskhBaseUrl()}
+                value={selectKisskhUrl()}
                 type="neutral"
               />
               <MetricBadge
