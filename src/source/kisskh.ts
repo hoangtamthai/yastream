@@ -616,11 +616,15 @@ export class KissKHScraperr extends BaseProvider {
       streamRow.duration = (info.hours * 60 + info.minutes).toString();
     }
     if (url.includes("m3u8")) {
-      const playlist = await axiosGet<string>(url, getWebshareProxyConfig());
-      if (playlist) {
-        // streamRow.playlist = playlist;
-        streamRow.hash = hashSHA256(playlist);
-        upsertStream([streamRow]);
+      try {
+        const playlist = await axiosGet<string>(url, getWebshareProxyConfig());
+        if (playlist) {
+          // streamRow.playlist = playlist;
+          streamRow.hash = hashSHA256(playlist);
+          upsertStream([streamRow]);
+        }
+      } catch (error) {
+        this.logger.error(`Failed to get playlist for ${url}`);
       }
     } else {
       upsertStream([streamRow]);

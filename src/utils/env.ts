@@ -29,7 +29,7 @@ const envSchema = z.object({
   CACHE_SIZE_MB: z.coerce.number().default(100),
   // Retry configuration
   RETRY_ATTEMPTS: z.coerce.number().default(2),
-  RETRY_TIMEOUT_MS: z.coerce.number().default(7000),
+  RETRY_TIMEOUT_MS: z.coerce.number().default(8000),
   RETRY_DELAY_MS: z.coerce.number().default(5000),
   RETRY_JITTER_MS: z.coerce.number().default(500),
   LOG_LEVEL: z
