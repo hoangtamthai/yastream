@@ -303,9 +303,9 @@ export class KissKHScraperr extends BaseProvider {
             type,
             fallbackUrl: tmdbDetail.thumbnail || poster,
           };
-          if (tmdbDetail.tmdbId) {
-            id = `${Prefix.TMDB}:${tmdbDetail.tmdbId}`;
-          }
+          // if (tmdbDetail.tmdbId) {
+          //   id = `${Prefix.TMDB}:${tmdbDetail.tmdbId}`;
+          // }
           if (tmdbDetail.imdbId) {
             posterParam.prefix = Prefix.IMDB;
             posterParam.id = tmdbDetail.imdbId;
