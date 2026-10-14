@@ -248,6 +248,10 @@ export async function getCountStream() {
   const number = await db.select({ count: count(stream.id) }).from(stream);
   return number;
 }
+export async function deleteStream(id: string) {
+  if (!db) return;
+  await db.delete(stream).where(eq(stream.id, id));
+}
 
 // SUBTITLES
 export async function upsertSubtitles(
@@ -332,6 +336,10 @@ export async function getCountSubtitles() {
   if (!db) return;
   const number = await db.select({ count: count(subtitle.id) }).from(subtitle);
   return number;
+}
+export async function deleteSubtitle(id: string) {
+  if (!db) return;
+  await db.delete(subtitle).where(eq(subtitle.id, id));
 }
 
 // KV

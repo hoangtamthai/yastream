@@ -1,5 +1,6 @@
 import { Stream } from "@stremio-addon/sdk";
 import {
+  deleteStream,
   getCountStream,
   getStream,
   getStreamsJoinProvider,
@@ -61,6 +62,7 @@ class StreamService {
             info = probeInfo || info;
             const workingStream = checkWorkingStream(probeInfo);
             if (!workingStream) {
+              deleteStream(stream.stream.id);
               return;
             }
             if (info?.resolution) {

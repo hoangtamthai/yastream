@@ -139,6 +139,7 @@ const ONETOUCHTV_LANGUAGE: Record<string, CountryCode> = {
   Português: CountryCode.pt,
   ខ្មែរ: CountryCode.km,
   "По-русски": CountryCode.ru,
+  Romanian: CountryCode.ro,
   Melayu: CountryCode.ms,
   ภาษาไทย: CountryCode.th,
   Русский: CountryCode.ru,
@@ -574,7 +575,10 @@ export class OnetouchtvScrapper extends BaseProvider {
       const maxAttempts = 2;
       while (attempts < maxAttempts) {
         this.logger.log(`GET playlist | ${playlistUrl}`);
-        playlist = await axiosGet<string>(playlistUrl, getWebshareProxyConfig());
+        playlist = await axiosGet<string>(
+          playlistUrl,
+          getWebshareProxyConfig(),
+        );
         if (!playlist) break;
         if (!playlist.includes(ONETOUCHTV_HOST)) {
           break;

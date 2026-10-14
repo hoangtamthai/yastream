@@ -1,12 +1,16 @@
 import { Subtitle } from "@stremio-addon/sdk";
 import {
+  deleteSubtitle,
   getCountSubtitles,
   getSubtitle,
   getSubtitlesJoinProvider,
+  upsertSubtitles,
 } from "../../db/queries.js";
+import { axiosGet } from "../../utils/axios.js";
 import { cache } from "../../utils/cache.js";
 import { API, SUBTITLES } from "../../utils/constant.js";
 import { getOrigin } from "../../utils/domain.js";
+import { getWebshareProxyConfig } from "../../utils/proxy/webshare.js";
 
 class SubtitleService {
   static async getSubtitle(id: string) {
@@ -17,6 +21,7 @@ class SubtitleService {
     if (cacheResult) return cacheResult;
     return subtitle;
   }
+
   static async getSubtitlesFromDb(
     id: string,
     season: number,
@@ -28,28 +33,40 @@ class SubtitleService {
       episode ?? 1,
     );
     if (subtitlesAndProvider && subtitlesAndProvider.length > 0) {
-      const subtitles = subtitlesAndProvider.map((subtitle) => {
-        let url = subtitle.subtitle.url;
-        if (subtitle.subtitle.subtitle) {
-          url = SubtitleService.getSubtitleUrl(subtitle.subtitle.id);
-        }
-        const isExpired =
-          subtitle.subtitle.updatedAt.getTime() + (subtitle.subtitle.ttl ?? 0) <
-          Date.now();
-        if (isExpired) {
-          return;
-        }
-        return {
-          id: id,
-          label: subtitle.provider_content.provider,
-          lang: subtitle.subtitle.lang,
-          url: url,
-        };
-      });
+      const subtitles = await Promise.all(
+        subtitlesAndProvider.map(async (subtitle) => {
+          let url = subtitle.subtitle.url;
+          const ttl = subtitle.subtitle.ttl ?? 0;
+          if (subtitle.subtitle.subtitle) {
+            url = SubtitleService.getSubtitleUrl(subtitle.subtitle.id);
+          }
+          const isExpired =
+            subtitle.subtitle.updatedAt.getTime() + ttl < Date.now();
+          if (isExpired) {
+            const subtitleContent = await axiosGet<String>(
+              url,
+              getWebshareProxyConfig(),
+            );
+            if (!subtitleContent) {
+              deleteSubtitle(subtitle.subtitle.id);
+              return;
+            }
+            subtitle.subtitle.ttl = Math.min(ttl * 2, Number.MAX_SAFE_INTEGER);
+            upsertSubtitles([subtitle.subtitle]);
+          }
+          return {
+            id: id,
+            label: subtitle.provider_content.provider,
+            lang: subtitle.subtitle.lang,
+            url: url,
+          };
+        }),
+      );
       return subtitles.filter((subtitle) => subtitle !== undefined);
     }
     return [];
   }
+
   static getSubtitleUrl(id: string) {
     return `${getOrigin()}/${API}/${SUBTITLES}/${id}.vtt`;
   }
