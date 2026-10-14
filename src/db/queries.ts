@@ -183,7 +183,7 @@ export async function upsertStream(rows: StreamInsert[]) {
       .insert(stream)
       .values(rows)
       .onConflictDoUpdate({
-        target: stream.url,
+        target: stream.id,
         set: {
           providerContentId: sql.raw(
             `excluded.${stream.providerContentId.name}`,

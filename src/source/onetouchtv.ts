@@ -545,10 +545,10 @@ export class OnetouchtvScrapper extends BaseProvider {
           if (info?.hours && info?.minutes) {
             streamRow.duration = (info.hours * 60 + info.minutes).toString();
           }
-          if (playlist) {
-            // streamRow.playlist = playlist;
-            streamRow.hash = hashSHA256(playlist);
-          }
+          // if (playlist) {
+          //   // streamRow.playlist = playlist;
+          //   streamRow.hash = hashSHA256(playlist);
+          // }
           streamRows.push(streamRow);
           return stream;
         }),

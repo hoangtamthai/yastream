@@ -27,7 +27,6 @@ import SubtitleService from "../service/resource/subtitle-service.js";
 import { axiosGet } from "../utils/axios.js";
 import { cache, TTL_MS } from "../utils/cache.js";
 import { RATE_LIMIT_DESCRIPTION, TICKCOUNTER_HOST } from "../utils/constant.js";
-import { hashSHA256 } from "../utils/crypto.js";
 import { getOrigin } from "../utils/domain.js";
 import { ENV } from "../utils/env.js";
 import {
@@ -41,12 +40,12 @@ import { cleanUrl, formatStreamTitle, parseOrigin } from "../utils/format.js";
 import { matchTitle } from "../utils/fuse.js";
 import { probeStreamInfo } from "../utils/info.js";
 import { CountryCode, iso639FromCountryCode } from "../utils/language.js";
+import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 import { getSetDecryptedSubtitle } from "./kisskh-subtitle.js";
 import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
-import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 
 export interface SearchResult {
   id: number;
@@ -615,20 +614,20 @@ export class KissKHScraperr extends BaseProvider {
     if (info?.hours && info?.minutes) {
       streamRow.duration = (info.hours * 60 + info.minutes).toString();
     }
-    if (url.includes("m3u8")) {
-      try {
-        const playlist = await axiosGet<string>(url, getWebshareProxyConfig());
-        if (playlist) {
-          // streamRow.playlist = playlist;
-          streamRow.hash = hashSHA256(playlist);
-          upsertStream([streamRow]);
-        }
-      } catch (error) {
-        this.logger.error(`Failed to get playlist for ${url}`);
-      }
-    } else {
-      upsertStream([streamRow]);
-    }
+    // if (url.includes("m3u8")) {
+    //   try {
+    //     const playlist = await axiosGet<string>(url, getWebshareProxyConfig());
+    //     if (playlist) {
+    //       // streamRow.playlist = playlist;
+    //       streamRow.hash = hashSHA256(playlist);
+    //       upsertStream([streamRow]);
+    //     }
+    //   } catch (error) {
+    //     this.logger.error(`Failed to get playlist for ${url}`);
+    //   }
+    // } else {
+    upsertStream([streamRow]);
+    // }
     return streamDatas;
   }
 

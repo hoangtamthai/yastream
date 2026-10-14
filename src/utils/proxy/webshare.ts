@@ -14,3 +14,8 @@ export function getWebshareProxyConfig() {
   };
   return proxyConfig;
 }
+
+export function getWebshareProxyUrl() {
+  if (!ENV.PROXY_WEBSHARE_URL) return undefined;
+  return `http://${ENV.PROXY_WEBSHARE_USERNAME}:${ENV.PROXY_WEBSHARE_PASSWORD}@${ENV.PROXY_WEBSHARE_URL}:${ENV.PROXY_WEBSHARE_PORT}`;
+}

@@ -1,8 +1,13 @@
 import { execFileSync } from "node:child_process";
 import { EStream } from "../db/schema/stream.js";
 import { axiosGet } from "./axios.js";
+import { ENV } from "./env.js";
 import { handleError, ProbeInfoError } from "./error.js";
 import { Logger } from "./logger.js";
+import {
+  getWebshareProxyConfig,
+  getWebshareProxyUrl,
+} from "./proxy/webshare.js";
 
 const logger = new Logger("INFO");
 
@@ -31,10 +36,20 @@ interface ProbeInfo {
 }
 export type Quality = "2160p" | "1080pHD" | "1080p" | "720p" | "480p";
 
+export function checkWorkingStream(info: StreamInfo | undefined) {
+  if (!info) return false;
+  const existStream =
+    info.resolution !== undefined ||
+    info.size !== undefined ||
+    info.hours !== undefined ||
+    info.minutes !== undefined;
+  return existStream;
+}
+
 export async function probeStreamInfo(
   url: string,
 ): Promise<StreamInfo | undefined> {
-  let info: StreamInfo | undefined = { size: 0 };
+  let info: StreamInfo | undefined = undefined;
   try {
     const uri = new URL(url);
     const isM3u8 = uri.pathname.endsWith(".m3u8");
@@ -52,10 +67,10 @@ export async function probeStreamInfo(
   return info;
 }
 
-async function probeMp4(url: string): Promise<StreamInfo> {
+async function probeMp4(url: string): Promise<StreamInfo | undefined> {
   logger.log(`GET mp4 info | ${url}`);
   const data = await getProbeInfo(url);
-  if (!data) return { size: 0 };
+  if (!data) return undefined;
   const hours = getHours(data.format.duration);
   const minutes = getMinutes(data.format.duration);
   const resolution: Resolution = {
@@ -82,7 +97,7 @@ function getMinutes(durationSeconds: number) {
 
 async function probeM3u8(url: string): Promise<StreamInfo | undefined> {
   logger.log(`GET m3u8 | ${url}`);
-  const data = await axiosGet<string>(url);
+  const data = await axiosGet<string>(url, getWebshareProxyConfig());
   if (!data) return undefined;
   const lines = data.split("\n");
 
@@ -170,7 +185,7 @@ function isValidSegmentUrl(url: string) {
 }
 
 export function getFfprobeArgs(url: string): string[] {
-  return [
+  const args = [
     "-v",
     "error",
     "-select_streams",
@@ -185,8 +200,12 @@ export function getFfprobeArgs(url: string): string[] {
     "ALL",
     "-extension_picky",
     "0",
-    url,
   ];
+  if (ENV.PROXY_WEBSHARE_URL) {
+    args.push("-http_proxy", getWebshareProxyUrl()!);
+  }
+  args.push(url);
+  return args;
 }
 
 export function getProbeInfo(url: string): ProbeInfo | null {

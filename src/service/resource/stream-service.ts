@@ -15,7 +15,11 @@ import {
 import { API, STREAMS, TICKCOUNTER_HOST } from "../../utils/constant.js";
 import { getOrigin } from "../../utils/domain.js";
 import { extractSeason, formatStreamTitle } from "../../utils/format.js";
-import { parseInfo, probeStreamInfo, StreamInfo } from "../../utils/info.js";
+import {
+  checkWorkingStream,
+  parseInfo,
+  probeStreamInfo,
+} from "../../utils/info.js";
 import RedirectService from "../redirect/redirect-service.js";
 
 class StreamService {
@@ -44,25 +48,21 @@ class StreamService {
       const streams = await Promise.all(
         streamsAndProvider.map(async (stream, index) => {
           let url = stream.stream.url;
-          const provider = stream.provider_content.provider;
-          // if (stream.streams.playlist) {
-          // Violate Cloudflare's ToS if serve m3u8 stream
-          // url = StreamService.getStreamUrl(stream.streams.id);
-          const isExpired =
-            stream.stream.updatedAt.getTime() + (stream.stream.ttl ?? 0) <
-            Date.now();
-          if (url.includes(TICKCOUNTER_HOST) || isExpired) {
+          if (url.includes(TICKCOUNTER_HOST)) {
             return;
           }
-          let info: StreamInfo = parseInfo(stream.stream);
-          const hasFullInfo: boolean =
-            info.resolution !== undefined &&
-            info.size !== undefined &&
-            info.hours !== undefined &&
-            info.minutes !== undefined;
-          if (config.info && !hasFullInfo) {
+          const ttl = stream.stream.ttl;
+          const updatedAt = stream.stream.updatedAt;
+          const isExpired = updatedAt.getTime() + (ttl ?? 0) < Date.now();
+          const provider = stream.provider_content.provider;
+          let info = parseInfo(stream.stream);
+          if (isExpired) {
             const probeInfo = await probeStreamInfo(url);
             info = probeInfo || info;
+            const workingStream = checkWorkingStream(probeInfo);
+            if (!workingStream) {
+              return;
+            }
             if (info?.resolution) {
               stream.stream.resolution = `${info.resolution.width}x${info.resolution.height}`;
             }
@@ -74,6 +74,10 @@ class StreamService {
                 info.minutes
               ).toString();
             }
+            // Extend ttl by double if link still working
+            stream.stream.ttl = ttl
+              ? Math.min(ttl * 2, Number.MAX_SAFE_INTEGER)
+              : ttl;
             upsertStream([{ ...stream.stream }]);
           }
           season = extractSeason(stream.provider_content.title).season ?? 1;
