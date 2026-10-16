@@ -1,8 +1,8 @@
 # v0.11.4 2026-10-14
 
 - Add: use DB link first, if still work then reuse and extend ttl time
-- Change: not save hash or playlist 
-
+- Add: stream and subtitle indexes
+- Change: not save hash or playlist
 
 # v0.11.3 2026-10-11
 

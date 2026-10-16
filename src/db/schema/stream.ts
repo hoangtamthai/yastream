@@ -38,6 +38,11 @@ export const stream = pgTable(
     unique("uq_stream_url").on(table.url),
     unique("uq_stream_hash").on(table.hash),
     index("idx_stream_provider_id").on(table.providerContentId),
+    index("idx_stream_provider_season_episode").on(
+      table.providerContentId,
+      table.season,
+      table.episode,
+    ),
   ],
 );
 

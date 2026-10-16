@@ -43,6 +43,11 @@ export const subtitle = pgTable(
       table.lang,
     ),
     index("idx_subtitle_provider_id").on(table.providerContentId),
+    index("idx_subtitle_provider_season_episode").on(
+      table.providerContentId,
+      table.season,
+      table.episode,
+    ),
   ],
 );
 

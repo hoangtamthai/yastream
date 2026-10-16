@@ -1,0 +1,2 @@
+CREATE INDEX "idx_stream_provider_season_episode" ON "stream" ("provider_content_id","season","episode");--> statement-breakpoint
+CREATE INDEX "idx_subtitle_provider_season_episode" ON "subtitle" ("provider_content_id","season","episode");
