@@ -5,11 +5,10 @@ export const STREAMS = `streams-resource`;
 export const SUBTITLES = `subtitles-resource`;
 export const RATE_LIMIT_DESCRIPTION = `Rate limit\nRetry after a few seconds`;
 
+export const IDRAMA_HOST = "www.idramahd.com";
+export const IDRAMA_ORIGIN = `https://${IDRAMA_HOST}`;
 export const ONETOUCHTV_ORIGIN = "https://onetouchtv.xyz";
 export const TICKCOUNTER_HOST = "tickcounter.com";
-
-// Host/origin constants live here, not in the source modules: utils/axios.ts
-// needs them, and importing the source graph from a leaf util is a cycle.
 export const GOFILE_HOST = "gofile.io";
 export const GOFILE_ORIGIN = `https://${GOFILE_HOST}`;
 export const GOFILE_API_ORIGIN = `https://api.${GOFILE_HOST}`;
@@ -20,6 +19,7 @@ export const FILECRYPT_ORIGIN = `https://${FILECRYPT_HOST}`;
 export const VIEWCRATE_HOST = "viewcrate.cc";
 export const VIEWCRATE_ORIGIN = `https://${VIEWCRATE_HOST}`;
 export const MKVDRAMA_ORIGIN = ENV.MKVDRAMA_URL;
+export const MKVDRAMA_HOST = new URL(MKVDRAMA_ORIGIN).hostname;
 export const VIKING_HOST = "vikingfile.com";
 export const VIKING_ORIGIN = `https://${VIKING_HOST}`;
 export const PIXELDRAIN_HOST = "pixeldrain.com";

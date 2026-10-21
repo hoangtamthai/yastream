@@ -1,6 +1,6 @@
 {
   "name": "yastream",
-  "version": "0.11.4",
+  "version": "0.11.5",
   "description": "Yet Another Stream. Stream asian dramas, series and movies directly with multiple providers. Support catalogs with country selection. Powered by TMDB and TVDB for metadata",
   "scripts": {
     "start": "node --env-file=.env dist/server.js",
@@ -57,7 +57,7 @@
     "@types/probe-image-size": "^7.2.5",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^1.0.0-rc.5-ab785fc",
-    "jose": "^6.2.12",
+    "jose": "^6.2.13",
     "typescript": "^6.0.3",
     "vitest": "^3.2.7"
   }

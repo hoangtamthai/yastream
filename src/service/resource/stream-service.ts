@@ -21,6 +21,7 @@ import {
   parseInfo,
   probeStreamInfo,
 } from "../../utils/info.js";
+import { matchesHost } from "../../utils/url-validation.js";
 import RedirectService from "../redirect/redirect-service.js";
 
 class StreamService {
@@ -49,15 +50,15 @@ class StreamService {
       const streams = await Promise.all(
         streamsAndProvider.map(async (stream, index) => {
           let url = stream.stream.url;
-          if (url.includes(TICKCOUNTER_HOST)) {
+          if (matchesHost(url, TICKCOUNTER_HOST)) {
             return;
           }
-          const ttl = stream.stream.ttl;
+          const ttl = stream.stream.ttl ?? 0;
           const updatedAt = stream.stream.updatedAt;
-          const isExpired = updatedAt.getTime() + (ttl ?? 0) < Date.now();
+          const isExpired = updatedAt.getTime() + ttl < Date.now();
           const provider = stream.provider_content.provider;
           let info = parseInfo(stream.stream);
-          if (isExpired) {
+          if (isExpired && !isHosterUrl(url)) {
             const probeInfo = await probeStreamInfo(url);
             info = probeInfo || info;
             const workingStream = checkWorkingStream(probeInfo);

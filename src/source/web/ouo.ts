@@ -7,6 +7,7 @@ import {
 } from "../../utils/browser/flaresolverr.js";
 import { OuoError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
+import { matchesAnyHost } from "../../utils/url-validation.js";
 export const OUO_HOSTS = ["ouo.io", "ouo.press"];
 
 const logger = new Logger("OUO");
@@ -50,7 +51,7 @@ export async function getOuoFinalUrl(url: string, session: string = "ouo") {
     // logger.debug(`finalUrl ${finalUrl}`);
     // parse content
     if (!content) throw new OuoError("No content");
-    if (!OUO_HOSTS.some((host) => finalUrl?.includes(host))) {
+    if (!matchesAnyHost(finalUrl || "", OUO_HOSTS)) {
       break;
     }
     const $ = cheerio.load(content);
@@ -117,7 +118,7 @@ export async function getOuoFinalUrlBrowser(
     finalUrl = data?.solution?.url;
     // parse content
     if (!content) throw new Error("No content");
-    if (!OUO_HOSTS.some((host) => finalUrl?.includes(host))) {
+    if (!matchesAnyHost(finalUrl || "", OUO_HOSTS)) {
       break;
     }
     const $ = cheerio.load(content);

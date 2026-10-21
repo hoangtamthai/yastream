@@ -6,11 +6,10 @@ import {
   getSubtitlesJoinProvider,
   upsertSubtitles,
 } from "../../db/queries.js";
-import { axiosGet } from "../../utils/axios.js";
-import { cache } from "../../utils/cache.js";
+import { SubtitleInsert } from "../../db/schema/subtitle.js";
+import { cache, TTL_MS } from "../../utils/cache.js";
 import { API, SUBTITLES } from "../../utils/constant.js";
 import { getOrigin } from "../../utils/domain.js";
-import { getWebshareProxyConfig } from "../../utils/proxy/webshare.js";
 
 class SubtitleService {
   static async getSubtitle(id: string) {
@@ -22,10 +21,12 @@ class SubtitleService {
     return subtitle;
   }
 
+  // Select only subtitles that are not expired
   static async getSubtitlesFromDb(
     id: string,
     season: number,
     episode: number,
+    checkTTL = true,
   ): Promise<Subtitle[]> {
     const subtitlesAndProvider = await getSubtitlesJoinProvider(
       id,
@@ -42,17 +43,8 @@ class SubtitleService {
           }
           const isExpired =
             subtitle.subtitle.updatedAt.getTime() + ttl < Date.now();
-          if (isExpired) {
-            const subtitleContent = await axiosGet<String>(
-              url,
-              getWebshareProxyConfig(),
-            );
-            if (!subtitleContent) {
-              deleteSubtitle(subtitle.subtitle.id);
-              return;
-            }
-            subtitle.subtitle.ttl = Math.min(ttl * 2, Number.MAX_SAFE_INTEGER);
-            upsertSubtitles([subtitle.subtitle]);
+          if (checkTTL && isExpired) {
+            return;
           }
           return {
             id: id,
@@ -76,6 +68,39 @@ class SubtitleService {
     if (!subtitles) return 0;
     const total = Number(subtitles[0]?.count ?? 0);
     return total;
+  }
+
+  static async syncSubtitles(
+    newSubtitles: SubtitleInsert[],
+    name: string,
+    id: string,
+    episode?: number,
+  ) {
+    // Process each new subtitle: check URL match with saved subtitles
+    const savedSubtitles = await SubtitleService.getSubtitlesFromDb(
+      `${name}:${id}`,
+      1,
+      episode ?? 1,
+      false,
+    );
+    const processedSubtitleRows = await Promise.all(
+      newSubtitles.map(async (row) => {
+        // Find matching saved subtitle by URL
+        const matchingSaved = savedSubtitles.find((s) => s.lang === row.lang);
+        if (!matchingSaved) {
+          return row;
+        } else if (matchingSaved.url === row.url) {
+          // URL matches - double the TTL and update the record
+          row.ttl = TTL_MS.stream * 2;
+          row.id = matchingSaved.id;
+        } else {
+          // URL doesn't match - remove the old subtitle from DB
+          deleteSubtitle(matchingSaved.id);
+        }
+        return row;
+      }),
+    );
+    upsertSubtitles(processedSubtitleRows);
   }
 }
 export default SubtitleService;

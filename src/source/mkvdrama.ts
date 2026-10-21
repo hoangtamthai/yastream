@@ -25,6 +25,7 @@ import {
   getJobQueue,
   JobMkvdramaScrape,
   JobMkvdramaStream,
+  MkvdramaJobRunner,
 } from "../service/job/job.js";
 import ProviderService from "../service/provider/provider-service.js";
 import StreamService from "../service/resource/stream-service.js";
@@ -38,6 +39,7 @@ import { cache, TTL_MS } from "../utils/cache.js";
 import {
   FILECRYPT_HOST,
   FILECRYPT_ORIGIN,
+  MKVDRAMA_HOST,
   MKVDRAMA_ORIGIN,
   VIEWCRATE_HOST,
   VIEWCRATE_ORIGIN,
@@ -48,10 +50,12 @@ import { extractTitle } from "../utils/format.js";
 import { matchTitle } from "../utils/fuse.js";
 import { Quality } from "../utils/info.js";
 import { ntfy } from "../utils/notify/ntfy.js";
+import { matchesAnyHost, matchesHost } from "../utils/url-validation.js";
 import { EpisodeHoster, hosterToStream } from "./hoster/hoster.js";
 import { ContentDetail } from "./meta.js";
 import { BaseProvider } from "./provider.js";
 import { getUrlsFromFilecrypt } from "./web/filecrypt.js";
+import { getUrlsFromMkvdrama } from "./web/mkvdrama.js";
 import { getOuoFinalUrl, getOuoId, OUO_HOSTS } from "./web/ouo.js";
 import { getUrlsFromViewcrateDlc } from "./web/viewcrate.js";
 interface MkvdramaSeries {
@@ -82,9 +86,6 @@ interface MkvdramaEpisode {
   url: string;
 }
 
-// export const MKVDRAMA_HOST = "mkvdrama.net";
-export { MKVDRAMA_ORIGIN } from "../utils/constant.js";
-// export const MKVDRAMA_HOST
 const BEST_QUALITIES = ["2160p", "1080pHD", "1080p"];
 
 const MKVDRAMA_COUNTRY: Record<string, string> = {
@@ -95,11 +96,6 @@ const MKVDRAMA_COUNTRY: Record<string, string> = {
   Philippine: "philippines",
   Popular: "",
 };
-
-export interface MkvdramaJobRunner {
-  runMkvdramaStream(job: EJob): Promise<void>;
-  runMkvdramaScrape(job: EJob): Promise<void>;
-}
 
 export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
   readonly baseUrl = MKVDRAMA_ORIGIN;
@@ -534,14 +530,14 @@ export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
           if (!originalUrl) return;
           let redirectedUrl: string | undefined;
           let id: string | undefined;
-          const isOuo = OUO_HOSTS.some((host) => originalUrl.includes(host));
+          const isOuo = matchesAnyHost(originalUrl, OUO_HOSTS);
           switch (true) {
             case isOuo:
               redirectedUrl = await getOuoFinalUrl(originalUrl);
               id = getOuoId(originalUrl);
               break;
-            case originalUrl.includes(VIEWCRATE_ORIGIN):
-            case originalUrl.includes(FILECRYPT_ORIGIN):
+            case matchesHost(originalUrl, VIEWCRATE_ORIGIN):
+            case matchesHost(originalUrl, FILECRYPT_ORIGIN):
               redirectedUrl = originalUrl;
               id = getOuoId(originalUrl);
               break;
@@ -601,15 +597,20 @@ export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
         // can have protected content (password required)
         try {
           switch (true) {
-            case redirectedUrl.includes(VIEWCRATE_HOST):
+            case matchesHost(redirectedUrl, VIEWCRATE_HOST):
               const viewcrate = await getUrlsFromViewcrateDlc(redirectedUrl);
               urls = viewcrate.urls;
               episodes = viewcrate.episodes;
               break;
-            case redirectedUrl.includes(FILECRYPT_HOST):
+            case matchesHost(redirectedUrl, FILECRYPT_HOST):
               const filecrypt = await getUrlsFromFilecrypt(redirectedUrl);
               urls = filecrypt.urls;
               episodes = filecrypt.episodes;
+              break;
+            case matchesHost(redirectedUrl, MKVDRAMA_HOST):
+              const mkvdrama = await getUrlsFromMkvdrama(redirectedUrl);
+              urls = mkvdrama.urls;
+              episodes = mkvdrama.episodes;
               break;
             default:
               urls.push(redirectedUrl);
@@ -678,7 +679,7 @@ export class MkvdramaScraper extends BaseProvider implements MkvdramaJobRunner {
       const response = await getFlareSolverr(url, this.name, 1);
       ouoLink = response?.solution?.url || null;
       if (ouoLink) {
-        if (OUO_HOSTS.some((host) => ouoLink?.includes(host))) {
+        if (matchesAnyHost(ouoLink, OUO_HOSTS)) {
           this.logger.log(`getRedirectedUrl ${url} from flaresolverr`);
           return ouoLink;
         }

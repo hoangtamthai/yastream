@@ -11,6 +11,7 @@ import * as cheerio from "cheerio";
 import { Prefix, UserConfig } from "../lib/manifest.js";
 import { axiosGet } from "../utils/axios.js";
 import { cache } from "../utils/cache.js";
+import { IDRAMA_ORIGIN } from "../utils/constant.js";
 import { ENV } from "../utils/env.js";
 import { formatStreamTitle } from "../utils/format.js";
 import { probeStreamInfo } from "../utils/info.js";
@@ -49,7 +50,7 @@ interface IDramaBloggerResult {
 }
 
 export class IDramaScraper extends BaseProvider {
-  baseUrl = "https://www.idramahd.com";
+  baseUrl = IDRAMA_ORIGIN;
   supportedPrefix: Prefix[] = [Prefix.IDRAMA];
   pageSize = 30;
   public readonly BLOG_IDS = {
@@ -174,13 +175,7 @@ export class IDramaScraper extends BaseProvider {
       const url = episode ? urls[episode - 1] : urls[0];
       if (!url) return [];
       const info = config.info ? await probeStreamInfo(url) : undefined;
-      const formatTitle = formatStreamTitle(
-        title,
-        year,
-        season,
-        episode,
-        info,
-      );
+      const formatTitle = formatStreamTitle(title, year, season, episode, info);
       this.logger.log(`Stream Url | ${url}`);
       const streams: Stream[] = [
         {

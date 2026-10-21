@@ -5,6 +5,7 @@ import { isHosterUrl } from "../../source/hoster/hoster.js";
 import { OUO_HOSTS } from "../../source/web/ouo.js";
 import { extractHeaderInfo } from "../router/analytics.js";
 import { decodeConfig } from "../router/stremio.js";
+import { matchesAnyHost } from "../../utils/url-validation.js";
 
 export const REDIRECT = "redirect";
 export async function redirectApiHandler(c: Context) {
@@ -25,7 +26,7 @@ export async function redirectApiHandler(c: Context) {
   if (!protocol || !path || !season || !episode) {
     return c.text("Invalid URL", 400);
   }
-  if (!OUO_HOSTS.some((host) => args.includes(host))) {
+  if (!matchesAnyHost(args, OUO_HOSTS)) {
     return c.text("Invalid URL", 400);
   }
 

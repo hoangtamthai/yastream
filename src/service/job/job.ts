@@ -8,7 +8,6 @@ import {
 } from "../../db/query/job.js";
 import { EJob, EJobInsert, JOB_STATUS, JOB_TYPE } from "../../db/schema/job.js";
 import { ContentDetail } from "../../source/meta.js";
-import { MkvdramaJobRunner } from "../../source/mkvdrama.js";
 import { ENV } from "../../utils/env.js";
 import { handleError } from "../../utils/error.js";
 import { Logger } from "../../utils/logger.js";
@@ -20,6 +19,11 @@ export interface JobMkvdramaStream {
 }
 export interface JobMkvdramaScrape {
   pageUrl: string;
+}
+
+export interface MkvdramaJobRunner {
+  runMkvdramaStream(job: EJob): Promise<void>;
+  runMkvdramaScrape(job: EJob): Promise<void>;
 }
 
 let mkvdramaRunner: MkvdramaJobRunner | undefined;

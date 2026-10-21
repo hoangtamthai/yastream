@@ -2,11 +2,12 @@ import { UserConfig } from "../../lib/manifest.js";
 import { axiosGet } from "../../utils/axios.js";
 import { GOFILE_API_ORIGIN, GOFILE_ORIGIN } from "../../utils/constant.js";
 import { cleanUrl } from "../../utils/format.js";
+import { matchesHost } from "../../utils/url-validation.js";
 
 interface GofileContent {}
 export function filterGofileUrls(urls: string[]) {
   return urls
-    .filter((url) => url.includes(GOFILE_ORIGIN))
+    .filter((url) => matchesHost(url, GOFILE_ORIGIN))
     .map((url) => cleanUrl(url));
 }
 

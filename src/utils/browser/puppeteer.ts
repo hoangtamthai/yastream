@@ -4,6 +4,7 @@
 import { load } from "cheerio";
 import puppeteer, { CookieData, Handler, Page } from "puppeteer";
 import { OUO_HOSTS } from "../../source/web/ouo.js";
+import { matchesAnyHost, matchesHost } from "../../utils/url-validation.js";
 import { PIXELDRAIN_HOST } from "../constant.js";
 import { ENV } from "../env.js";
 import { handleError } from "../error.js";
@@ -262,7 +263,7 @@ export async function getRedirectedUrlCDP(
           if (redirectLocation) redirectedUrl = redirectLocation;
         }
       }
-      if (FINAL_HOSTS.some((host) => params.documentURL.includes(host))) {
+      if (matchesAnyHost(params.documentURL, FINAL_HOSTS)) {
         redirectLocation = params.documentURL;
         return;
       }

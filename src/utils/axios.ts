@@ -13,17 +13,21 @@ import { cache, TTL_MS } from "./cache.js";
 import {
   DECRYPTIT_HOST,
   DECRYPTIT_ORIGIN,
+  FILECRYPT_HOST,
   FILECRYPT_ORIGIN,
-  GOFILE_API_ORIGIN,
+  GOFILE_HOST,
   GOFILE_ORIGIN,
+  MKVDRAMA_HOST,
   MKVDRAMA_ORIGIN,
   ONETOUCHTV_ORIGIN,
+  VIEWCRATE_HOST,
   VIEWCRATE_ORIGIN,
 } from "./constant.js";
 import { ENV } from "./env.js";
 import { FlareSolverrError, RateLimitError } from "./error.js";
 import { Logger } from "./logger.js";
 import { getWebshareProxyConfig } from "./proxy/webshare.js";
+import { matchesAnyHost, matchesHost } from "./url-validation.js";
 
 // process.setMaxListeners(20);
 EventEmitter.defaultMaxListeners = 23;
@@ -123,28 +127,34 @@ onetouchtvClient.interceptors.response.use((response) => {
   return response;
 });
 
-const mkvdramaClient = createClient({
-  "User-Agent": ENV.USER_AGENT,
-  Accept: "text/html",
-  Origin: MKVDRAMA_ORIGIN,
-  Referer: MKVDRAMA_ORIGIN,
-});
+const mkvdramaClient = createClient(
+  {
+    "User-Agent": ENV.USER_AGENT,
+    Accept: "text/html",
+    Origin: MKVDRAMA_ORIGIN,
+    Referer: MKVDRAMA_ORIGIN,
+  },
+  getWebshareProxyConfig(),
+);
 
 function getClient(url: string) {
   switch (true) {
-    case ENV.KISSKH_URLS.some((kisskhUrl) => url.includes(kisskhUrl)):
+    case matchesAnyHost(
+      url,
+      ENV.KISSKH_URLS.map((url) => new URL(url).hostname),
+    ):
       return kisskhClient;
-    case url.includes(onetouchtvHost):
+    case matchesHost(url, onetouchtvHost):
       return onetouchtvClient;
-    case url.includes(MKVDRAMA_ORIGIN):
+    case matchesHost(url, MKVDRAMA_HOST):
       return mkvdramaClient;
-    case url.includes(VIEWCRATE_ORIGIN):
+    case matchesHost(url, VIEWCRATE_HOST):
       return viewcrateClient;
-    case url.includes(FILECRYPT_ORIGIN):
+    case matchesHost(url, FILECRYPT_HOST):
       return filecryptClient;
-    case url.includes(DECRYPTIT_ORIGIN):
+    case matchesHost(url, DECRYPTIT_HOST):
       return decryptitClient;
-    case url.includes(GOFILE_API_ORIGIN):
+    case matchesHost(url, GOFILE_HOST):
       return gofileClient;
     default:
       return defaultClient;

@@ -2,13 +2,19 @@ import { UserConfig } from "../../lib/manifest.js";
 import { postRedirectedUrlCDP } from "../../utils/browser/puppeteer.js";
 import { cleanUrl } from "../../utils/format.js";
 import { getMediaflowproxyTranscodeUrl } from "../../utils/mediaflowproxy.js";
+import { matchesAnyHost } from "../../utils/url-validation.js";
 
 export const SEND_HOSTS = ["send.cm", "send.now"];
 export const SEND_ORIGINS = SEND_HOSTS.map((host) => `https://${host}`);
 export const SEND_ORIGIN = SEND_ORIGINS[0] || "https://send.now";
 export function filterSendUrls(urls: string[]) {
   return urls
-    .filter((url) => SEND_ORIGINS.some((origin) => url.includes(origin)))
+    .filter((url) =>
+      matchesAnyHost(
+        url,
+        SEND_ORIGINS.map((url) => new URL(url).hostname),
+      ),
+    )
     .map((url) => cleanUrl(url));
 }
 

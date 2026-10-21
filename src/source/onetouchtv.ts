@@ -14,7 +14,6 @@ import {
   upsertContent,
   upsertProviderContent,
   upsertStream,
-  upsertSubtitles,
 } from "../db/queries.js";
 import { EContent } from "../db/schema/content.js";
 import { EProviderContentInsert } from "../db/schema/provider_content.js";
@@ -26,7 +25,6 @@ import StreamService from "../service/resource/stream-service.js";
 import SubtitleService from "../service/resource/subtitle-service.js";
 import { axiosGet } from "../utils/axios.js";
 import { cache, TTL_MS } from "../utils/cache.js";
-import { hashSHA256 } from "../utils/crypto.js";
 import {
   handleError,
   MatchingError,
@@ -38,11 +36,11 @@ import { cleanUrl, extractTitle, formatStreamTitle } from "../utils/format.js";
 import { matchTitle } from "../utils/fuse.js";
 import { probeStreamInfo } from "../utils/info.js";
 import { CountryCode, iso639FromCountryCode } from "../utils/language.js";
+import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
-import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 
 interface OnetouchtvTop {
   result: {
@@ -464,39 +462,6 @@ export class OnetouchtvScrapper extends BaseProvider {
         onetouchtvId.toString(),
         this.name,
       );
-      // const tmdbDetail = await tmdb.searchDetail(content.title, type);
-      // if (tmdbDetail) {
-      //   const oldContent = await getContentByTmdb(tmdbDetail.id, type);
-      //   if (oldContent) {
-      //     const contentId = oldContent.id;
-      //     upsertContent(contentId, tmdbDetail, TTL_MS.content);
-      //     const providerContent = await getProviderContentById(
-      //       `${Prefix.ONETOUCHTV}:${detail.result.id}`,
-      //     );
-      //     if (providerContent) {
-      //       upsertProviderContent({
-      //         ...providerContent,
-      //         title: detail.result.title,
-      //         contentId: contentId,
-      //         image: detail.result.image,
-      //         year: year,
-      //         ttl: null,
-      //       });
-      //     } else {
-      //       upsertProviderContent({
-      //         id: `${Prefix.ONETOUCHTV}:${onetouchtvId}`,
-      //         externalId: detail.result.id,
-      //         title: detail.result.title,
-      //         provider: this.name,
-      //         type: type,
-      //         contentId: contentId,
-      //         image: detail.result.image,
-      //         year: year,
-      //         ttl: null,
-      //       });
-      //     }
-      //   }
-      // }
       const identifier = detail.result.episodes[0]?.identifier;
       const episodeId = identifier || detail.result.id;
       const episodeData = detail.result.episodes.find(
@@ -613,7 +578,6 @@ export class OnetouchtvScrapper extends BaseProvider {
     if (cachedSubtitles) return cachedSubtitles;
     const savedSubtitles = await SubtitleService.getSubtitlesFromDb(
       `${this.name}:${onetouchtvId}`,
-      // content.season ?? 1,
       1,
       content.episode ?? 1,
     );
@@ -663,7 +627,12 @@ export class OnetouchtvScrapper extends BaseProvider {
         }),
       );
       const uniqueSubtitleRows = this._toUniqueSubtitles(subtitleRows);
-      upsertSubtitles(uniqueSubtitleRows);
+      SubtitleService.syncSubtitles(
+        uniqueSubtitleRows,
+        this.name,
+        onetouchtvId,
+        episode,
+      );
     }
     return subtitles;
   }

@@ -15,11 +15,10 @@ import {
   upsertContent,
   upsertProviderContent,
   upsertStream,
-  upsertSubtitles,
 } from "../db/queries.js";
 import { EContent } from "../db/schema/content.js";
 import { StreamInsert } from "../db/schema/stream.js";
-import { ESubtitleInsert } from "../db/schema/subtitle.js";
+import { SubtitleInsert } from "../db/schema/subtitle.js";
 import { Prefix, UserConfig } from "../lib/manifest.js";
 import ProviderService from "../service/provider/provider-service.js";
 import StreamService from "../service/resource/stream-service.js";
@@ -41,6 +40,7 @@ import { matchTitle } from "../utils/fuse.js";
 import { probeStreamInfo } from "../utils/info.js";
 import { CountryCode, iso639FromCountryCode } from "../utils/language.js";
 import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
+import { matchesHost } from "../utils/url-validation.js";
 import { getSetDecryptedSubtitle } from "./kisskh-subtitle.js";
 import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
@@ -48,7 +48,7 @@ import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
 
 export interface SearchResult {
-  id: number;
+  id: string;
   title: string;
   episodesCount: number;
   thumbnail: string;
@@ -187,11 +187,12 @@ export class KissKHScraperr extends BaseProvider {
     const metas = await Promise.all(
       filterResults.map(async (kissItem, index) => {
         const tmdbDetail = tmdbDetails[index];
+        const kisskhId = parseInt(kissItem.id);
         let poster = kissItem.thumbnail;
 
         // Use custom Poster if available
         if (tmdbDetail) {
-          const sameTitleId = this.kisskhTmdb.get(kissItem.id);
+          const sameTitleId = this.kisskhTmdb.get(kisskhId);
           if (sameTitleId) {
             tmdbDetail.id = sameTitleId;
           }
@@ -209,7 +210,7 @@ export class KissKHScraperr extends BaseProvider {
         }
 
         // Filter nsfw
-        if (!config.nsfw && this.nsfwIds.has(kissItem.id)) {
+        if (!config.nsfw && this.nsfwIds.has(kisskhId)) {
           poster = this.nsfwDefaultThumbnail;
         }
 
@@ -458,7 +459,7 @@ export class KissKHScraperr extends BaseProvider {
         cache.set(streamKey, dbStreams, TTL_MS.stream);
         return dbStreams;
       }
-      let streamId = parseInt(kisskhId ?? "0");
+      let streamId = kisskhId ?? "0";
       let streamTitle = title;
       if (!kisskhId) {
         const searchResult = await this.searchContent(
@@ -506,7 +507,7 @@ export class KissKHScraperr extends BaseProvider {
 
   async getSubtitles(content: ContentDetail): Promise<Subtitle[]> {
     const subtitleKey = `subtitles:${content.type}:${this.name}:${content.id}:${content.season}:${content.episode}`;
-    let kisskhId = content.kisskhId ? parseInt(content.kisskhId) : undefined;
+    let kisskhId = content.kisskhId ?? undefined;
     let cacheSubtitles = cache.get(subtitleKey);
     if (cacheSubtitles) return cacheSubtitles;
     const savedSubtitles = await SubtitleService.getSubtitlesFromDb(
@@ -561,7 +562,7 @@ export class KissKHScraperr extends BaseProvider {
   }
 
   async generateStreamsAndSubtitles(
-    kisskhId: number,
+    kisskhId: string,
     title: string,
     content: ContentDetail,
     config: UserConfig,
@@ -573,7 +574,7 @@ export class KissKHScraperr extends BaseProvider {
     if (!stream) return [];
     if (!stream.Video) return [];
     const url = this._fixUrl(stream.Video);
-    if (url.includes(TICKCOUNTER_HOST)) return [];
+    if (matchesHost(url, TICKCOUNTER_HOST)) return [];
     await ProviderService.syncContentAndProvider(
       content,
       kisskhId.toString(),
@@ -706,7 +707,7 @@ export class KissKHScraperr extends BaseProvider {
   }
 
   private async _getEpisode(
-    seriesId: number,
+    seriesId: string,
     episode: number = 1,
   ): Promise<{ episodeId: string; kisskhDetail: KisskhDetail }> {
     const detail = await this.getDetail(seriesId.toString());
@@ -753,7 +754,7 @@ export class KissKHScraperr extends BaseProvider {
 
   private async _getSubtitles(
     episodeId: string,
-    kisskhId: number,
+    kisskhId: string,
     episode?: number,
   ): Promise<Subtitle[]> {
     const token = await this._getToken(episodeId, this.subGuid);
@@ -786,7 +787,7 @@ export class KissKHScraperr extends BaseProvider {
     if (subtitles.length > 0) {
       const subtitleRows = await Promise.all(
         subtitles.map(async (subtitle) => {
-          const subtitleRow: Omit<ESubtitleInsert, "createdAt"> = {
+          const subtitleRow: SubtitleInsert = {
             ...subtitle,
             id: uuidv7(),
             providerContentId: `${this.name}:${kisskhId}`,
@@ -801,7 +802,7 @@ export class KissKHScraperr extends BaseProvider {
           return subtitleRow;
         }),
       );
-      upsertSubtitles(subtitleRows);
+      SubtitleService.syncSubtitles(subtitleRows, this.name, kisskhId, episode);
     }
     this.logger.log(`Subtitles found | ${subtitles.length}`);
     return subtitles;

@@ -1,3 +1,9 @@
+# v0.11.5 2026-10-21
+
+- Add: host matching with URL parse to prevent wrong match
+- Add: add mkvdrama as web source for links
+- Change: not always fetch subtitle to check from DB, check when fetch new subtitle
+
 # v0.11.4 2026-10-14
 
 - Add: use DB link first, if still work then reuse and extend ttl time

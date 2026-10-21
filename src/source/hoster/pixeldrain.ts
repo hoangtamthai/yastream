@@ -1,9 +1,10 @@
 import { PIXELDRAIN_ORIGIN } from "../../utils/constant.js";
 import { cleanUrl } from "../../utils/format.js";
+import { matchesHost } from "../../utils/url-validation.js";
 
 export function filterPixeldrainUrls(urls: string[]) {
   return urls
-    .filter((url) => url.includes(PIXELDRAIN_ORIGIN))
+    .filter((url) => matchesHost(url, PIXELDRAIN_ORIGIN))
     .map((url) => cleanUrl(url));
 }
 

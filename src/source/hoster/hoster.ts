@@ -16,6 +16,7 @@ import { getTorboxStreamUrl } from "../debrid/torbox.js";
 import { Provider } from "../provider.js";
 import { getPixeldrainDownloadUrl } from "./pixeldrain.js";
 import { getSendDownloadUrl, SEND_HOSTS } from "./send.js";
+import { matchesHost, matchesAnyHost } from "../../utils/url-validation.js";
 
 export interface EpisodeHoster {
   ep: number;
@@ -42,19 +43,19 @@ export function filterHosterUrlsFromUrls(urls: string[]) {
   let vikingUrls: string[] = [];
   urls.forEach((url) => {
     switch (true) {
-      case url.includes(PIXELDRAIN_HOST):
+      case matchesHost(url, PIXELDRAIN_HOST):
         pixeldrainUrls.push(cleanUrl(url));
         break;
-      case url.includes(GOFILE_HOST):
+      case matchesHost(url, GOFILE_HOST):
         gofileUrls.push(cleanUrl(url));
         break;
-      case url.includes(MEGA_HOST):
+      case matchesHost(url, MEGA_HOST):
         megaUrls.push(cleanUrl(url));
         break;
-      case url.includes(VIKING_HOST):
+      case matchesHost(url, VIKING_HOST):
         vikingUrls.push(cleanUrl(url));
         break;
-      case SEND_HOSTS.some((host) => url.includes(host)):
+      case matchesAnyHost(url, SEND_HOSTS):
         sendUrls.push(cleanUrl(url));
         break;
       default:
@@ -129,15 +130,15 @@ export function hosterToStream(
 
 export function getHosterFromUrl(url: string) {
   switch (true) {
-    case url.includes(PIXELDRAIN_HOST):
+    case matchesHost(url, PIXELDRAIN_HOST):
       return Hoster.PIXELDRAIN;
-    case url.includes(GOFILE_HOST):
+    case matchesHost(url, GOFILE_HOST):
       return Hoster.GOFILE;
-    case url.includes(MEGA_HOST):
+    case matchesHost(url, MEGA_HOST):
       return Hoster.MEGA;
-    case url.includes(VIKING_HOST):
+    case matchesHost(url, VIKING_HOST):
       return Hoster.VIKING;
-    case SEND_HOSTS.some((host) => url.includes(host)):
+    case matchesAnyHost(url, SEND_HOSTS):
       return Hoster.SEND;
     default:
       return null;
