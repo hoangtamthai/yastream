@@ -4,10 +4,7 @@ import { axiosGet } from "./axios.js";
 import { ENV } from "./env.js";
 import { handleError, ProbeInfoError } from "./error.js";
 import { Logger } from "./logger.js";
-import {
-  getWebshareProxyConfig,
-  getWebshareProxyUrl,
-} from "./proxy/webshare.js";
+import { getWebshareProxyUrl } from "./proxy/webshare.js";
 
 const logger = new Logger("INFO");
 
@@ -97,7 +94,7 @@ function getMinutes(durationSeconds: number) {
 
 async function probeM3u8(url: string): Promise<StreamInfo | undefined> {
   logger.log(`GET m3u8 | ${url}`);
-  const data = await axiosGet<string>(url, getWebshareProxyConfig());
+  const data = await axiosGet<string>(url);
   if (!data) return undefined;
   const lines = data.split("\n");
 

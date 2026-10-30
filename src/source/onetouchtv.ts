@@ -36,7 +36,6 @@ import { cleanUrl, extractTitle, formatStreamTitle } from "../utils/format.js";
 import { matchTitle } from "../utils/fuse.js";
 import { probeStreamInfo } from "../utils/info.js";
 import { CountryCode, iso639FromCountryCode } from "../utils/language.js";
-import { getWebshareProxyConfig } from "../utils/proxy/webshare.js";
 import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
@@ -540,10 +539,7 @@ export class OnetouchtvScrapper extends BaseProvider {
       const maxAttempts = 2;
       while (attempts < maxAttempts) {
         this.logger.log(`GET playlist | ${playlistUrl}`);
-        playlist = await axiosGet<string>(
-          playlistUrl,
-          getWebshareProxyConfig(),
-        );
+        playlist = await axiosGet<string>(playlistUrl);
         if (!playlist) break;
         if (!playlist.includes(ONETOUCHTV_HOST)) {
           break;
