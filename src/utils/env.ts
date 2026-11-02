@@ -84,6 +84,7 @@ const envSchema = z.object({
   PROXY_PASSWORD: z.string().default(""),
   PROXY_TMDB: z.coerce.boolean().default(false),
   PROXY_KISSKH_SUBTITLE: z.coerce.boolean().default(false),
+  PROXY_WEBSHARE_FFPROBE_ENABLED: z.coerce.boolean().default(false), 
   PROXY_WEBSHARE_URL: z.string().default(""),
   PROXY_WEBSHARE_PORT: z.coerce.number().default(80),
   PROXY_WEBSHARE_USERNAME: z.string().default(""),

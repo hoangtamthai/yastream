@@ -198,7 +198,7 @@ export function getFfprobeArgs(url: string): string[] {
     "-extension_picky",
     "0",
   ];
-  if (ENV.PROXY_WEBSHARE_URL) {
+  if (ENV.PROXY_WEBSHARE_FFPROBE_ENABLED) {
     args.push("-http_proxy", getWebshareProxyUrl()!);
   }
   args.push(url);
