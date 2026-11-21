@@ -8,6 +8,7 @@ export const RATE_LIMIT_DESCRIPTION = `Rate limit\nRetry after a few seconds`;
 export const IDRAMA_HOST = "www.idramahd.com";
 export const IDRAMA_ORIGIN = `https://${IDRAMA_HOST}`;
 export const ONETOUCHTV_ORIGIN = "https://onetouchtv.xyz";
+export const ASIANTV_ORIGIN = "https://asiantv1.lol";
 export const TICKCOUNTER_HOST = "tickcounter.com";
 export const GOFILE_HOST = "gofile.io";
 export const GOFILE_ORIGIN = `https://${GOFILE_HOST}`;

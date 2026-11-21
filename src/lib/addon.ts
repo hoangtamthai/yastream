@@ -18,6 +18,7 @@ import {
 import { EProviderContent } from "../db/schema/provider_content.js";
 import { registerMkvdramaJobRunner, startCronJob } from "../service/job/job.js";
 import ProviderService from "../service/provider/provider-service.js";
+import { AsiantvScraper } from "../source/asiantv.js";
 import { IDramaScraper } from "../source/idrama.js";
 import { KissKHScraperr } from "../source/kisskh.js";
 import { KkphimScraper } from "../source/kkphim.js";
@@ -38,12 +39,14 @@ const idrama = new IDramaScraper(Provider.IDRAMA);
 const kkphim = new KkphimScraper(Provider.KKPHIM);
 const ophim = new OphimScraper(Provider.OPHIM);
 const onetouchtv = new OnetouchtvScrapper(Provider.ONETOUCHTV);
+const asiantv = new AsiantvScraper(Provider.ASIANTV);
 const mkvdrama = new MkvdramaScraper(Provider.MKVDRAMA);
 registerMkvdramaJobRunner(mkvdrama);
 startCronJob();
 const providers: BaseProvider[] = [
   kisskh,
   onetouchtv,
+  asiantv,
   idrama,
   kkphim,
   ophim,
@@ -326,6 +329,75 @@ async function getContent(
       }
       if (!content) {
         logger.error(`Not found onetouchtv ${onetouchtvId}`);
+        return null;
+      }
+      content.season = season ? parseInt(season) : 1;
+      content.episode = episode ? parseInt(episode) : 1;
+      return content;
+    }
+    case args.id.startsWith(Prefix.ASIANTV): {
+      // id | asiantv:detailId:season:episode
+      const [prefix, asiantvId, season, episode] = args.id.split(":");
+      if (!asiantvId) return null;
+      const contentKey = `content:asiantv:${asiantvId}`;
+      const contentType = args.type === "series" ? "series" : "movie";
+      const cacheContent = cache.get(contentKey);
+      let content: ContentDetail | null = cacheContent;
+      if (!content) {
+        const dbContent = await ProviderService.getDbContent(
+          contentType,
+          { asiantvId },
+          parseInt(season ?? "1"),
+        );
+        content = dbContent ? dbContent : null;
+      }
+      if (!content) {
+        const providerContent = await getProviderContentById(
+          `${prefix}:${asiantvId}`,
+        );
+        if (providerContent) {
+          content = {
+            id: asiantvId,
+            asiantvId: asiantvId,
+            type: args.type,
+            title: providerContent.title,
+            year: providerContent.year,
+            season: season ? parseInt(season) : 1,
+            episode: episode ? parseInt(episode) : 1,
+          };
+        } else {
+          const detail = await asiantv.getDetail(asiantvId);
+          if (!detail) return null;
+          const extracted = extractTitle(detail.title);
+          content = {
+            id: asiantvId,
+            asiantvId: asiantvId,
+            title: extracted.title,
+            year: extracted.year || detail.year,
+            type: args.type,
+            season: season ? parseInt(season) : 1,
+            episode: episode ? parseInt(episode) : 1,
+          };
+          const providerContentRow: Omit<
+            EProviderContent,
+            "createdAt" | "updatedAt"
+          > = {
+            ...content,
+            id: `${Provider.ASIANTV}:${asiantvId}`,
+            contentId: null,
+            provider: Provider.ASIANTV,
+            externalId: asiantvId,
+            image: detail.poster
+              ? new URL(detail.poster, asiantv.baseUrl).toString()
+              : null,
+            ttl: TTL_MS.content,
+          };
+          upsertProviderContent(providerContentRow);
+        }
+        cache.set(contentKey, content, TTL_MS.content);
+      }
+      if (!content) {
+        logger.error(`Not found asiantv ${asiantvId}`);
         return null;
       }
       content.season = season ? parseInt(season) : 1;

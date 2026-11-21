@@ -1,3 +1,7 @@
+# v0.12.0 2026-11-21
+
+- Add: asiantv source for catalog and stream
+
 # v0.11.5 2026-10-21
 
 - Add: host matching with URL parse to prevent wrong match

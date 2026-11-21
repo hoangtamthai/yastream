@@ -42,7 +42,8 @@ class ProviderService {
   }
 
   static async getContentAndProvider(type: ContentType, contentId: ContentId) {
-    const { imdbId, tmdbId, tvdbId, kisskhId, onetouchtvId } = contentId;
+    const { imdbId, tmdbId, tvdbId, kisskhId, onetouchtvId, asiantvId } =
+      contentId;
     const hasMetaId = imdbId || tmdbId || tvdbId;
     if (hasMetaId) {
       const dbContentAndProvider = await getContentJoinProviderById(
@@ -60,7 +61,7 @@ class ProviderService {
         return dbContentAndProvider;
       }
     }
-    const hasProviderId = kisskhId || onetouchtvId;
+    const hasProviderId = kisskhId || onetouchtvId || asiantvId;
     if (hasProviderId) {
       let id: string | null = null;
       if (kisskhId) {
@@ -68,6 +69,9 @@ class ProviderService {
       }
       if (onetouchtvId) {
         id = `${Prefix.ONETOUCHTV}:${onetouchtvId}`;
+      }
+      if (asiantvId) {
+        id = `${Prefix.ASIANTV}:${asiantvId}`;
       }
       if (!id) return null;
       const dbContentAndProvider =
@@ -90,14 +94,22 @@ class ProviderService {
     season: number,
   ) {
     let dbContent: ContentDetail | null = null;
-    const { imdbId, tmdbId, tvdbId, kisskhId, onetouchtvId, mkvdramaId } =
-      contentId;
+    const {
+      imdbId,
+      tmdbId,
+      tvdbId,
+      kisskhId,
+      onetouchtvId,
+      asiantvId,
+      mkvdramaId,
+    } = contentId;
     const id: string | undefined =
       imdbId ??
       tmdbId?.toString() ??
       tvdbId?.toString() ??
       kisskhId ??
       onetouchtvId ??
+      asiantvId ??
       mkvdramaId;
     if (!id) return null;
     const dbContentAndProvider = await ProviderService.getContentAndProvider(
@@ -143,6 +155,16 @@ class ProviderService {
         season = extractedTitle.season ?? 1;
       }
     }
+    if (asiantvId) {
+      dbContent.asiantvId = asiantvId;
+      const provider = dbProviderContent.find((providerContent) => {
+        return providerContent.externalId === asiantvId;
+      });
+      if (provider) {
+        const extractedTitle = extractTitle(provider.title);
+        season = extractedTitle.season ?? 1;
+      }
+    }
     if (mkvdramaId) {
       dbContent.mkvdramaId = mkvdramaId;
       const provider = dbProviderContent.find((providerContent) => {
@@ -166,6 +188,12 @@ class ProviderService {
         case Provider.ONETOUCHTV:
           if (!onetouchtvId && extractedSeason === season) {
             dbContent.onetouchtvId = providerContent.externalId;
+            dbContent.title = providerContent.title;
+          }
+          break;
+        case Provider.ASIANTV:
+          if (!asiantvId && extractedSeason === season) {
+            dbContent.asiantvId = providerContent.externalId;
             dbContent.title = providerContent.title;
           }
           break;

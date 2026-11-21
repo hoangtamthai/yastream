@@ -95,6 +95,7 @@ function newTomSelect(selector) {
 }
 const kisskhSelect = newTomSelect("#kisskh-catalog");
 const onetouchtvSelect = newTomSelect("#onetouchtv-catalog");
+const asiantvSelect = newTomSelect("#asiantv-catalog");
 // const mkvdramaSelect = newTomSelect("#mkvdrama-catalog");
 
 function getTomSelect(catalog) {
@@ -103,6 +104,8 @@ function getTomSelect(catalog) {
       return kisskhSelect;
     case "onetouchtv":
       return onetouchtvSelect;
+    case "asiantv":
+      return asiantvSelect;
     // case "mkvdrama":
     //   return mkvdramaSelect;
     default:
@@ -112,6 +115,7 @@ function getTomSelect(catalog) {
 const catalogs = [
   "kisskh",
   "onetouchtv",
+  "asiantv",
   //"mkvdrama",
 ];
 function updateCatalogs() {
@@ -132,6 +136,8 @@ const hiddenCatalogs = [
   "kisskh.series.Search",
   "kisskh.movie.Search",
   "onetouchtv.series.Search",
+  "asiantv.series.Search",
+  "asiantv.movie.Search",
   // "mkvdrama.series.Search",
   "idrama.series.iDrama",
   "idrama.series.Search",

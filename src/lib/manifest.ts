@@ -34,6 +34,7 @@ export enum Prefix {
   IDRAMA = "idrama",
   KISSKH = "kisskh",
   ONETOUCHTV = "onetouchtv",
+  ASIANTV = "asiantv",
   MKVDRAMA = "mkvdrama",
 }
 
@@ -48,6 +49,8 @@ export const defaultCatalogs = [
   `${Prefix.ONETOUCHTV}.series.Korean`,
   `${Prefix.ONETOUCHTV}.series.Search`,
 
+  `${Prefix.ASIANTV}.series.Search`,
+
   // `${Prefix.MKVDRAMA}.series.Korean`,
   // `${Prefix.MKVDRAMA}.series.Search`,
 ];
@@ -56,11 +59,13 @@ export const defaultConfig: UserConfig = {
   catalog: [
     Provider.KISSKH,
     Provider.ONETOUCHTV,
+    Provider.ASIANTV,
     // Provider.MKVDRAMA
   ],
   stream: [
     Provider.KISSKH,
     Provider.ONETOUCHTV,
+    Provider.ASIANTV,
     // Provider.MKVDRAMA
   ],
   catalogs: defaultCatalogs,
@@ -113,6 +118,7 @@ const baseManifest: Manifest = {
     Prefix.IDRAMA,
     Prefix.KISSKH,
     Prefix.ONETOUCHTV,
+    Prefix.ASIANTV,
     // Prefix.MKVDRAMA,
   ],
   types: ["movie", "series"],
@@ -144,6 +150,7 @@ export function buildManifest(config?: UserConfig) {
         Prefix.IDRAMA,
         Prefix.KISSKH,
         Prefix.ONETOUCHTV,
+        Prefix.ASIANTV,
         // Prefix.MKVDRAMA,
       ],
     };

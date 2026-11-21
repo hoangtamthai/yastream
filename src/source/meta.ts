@@ -21,6 +21,7 @@ export interface ContentId {
   tvdbId?: number;
   kisskhId?: string;
   onetouchtvId?: string;
+  asiantvId?: string;
   idramaId?: string;
   mkvdramaId?: string;
 }

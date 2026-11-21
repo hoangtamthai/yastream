@@ -17,6 +17,7 @@ export enum Provider {
   KKPHIM = "kkphim",
   OPHIM = "ophim",
   ONETOUCHTV = "onetouchtv",
+  ASIANTV = "asiantv",
   MKVDRAMA = "mkvdrama",
   TMDB = "tmdb",
   TVDB = "tvdb",
