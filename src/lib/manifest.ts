@@ -17,6 +17,7 @@ export interface UserConfig {
   stream: Provider[];
   nsfw: boolean;
   info: boolean;
+  tmdbId: boolean;
   poster: "rpdb" | "erdb" | "xrdb";
   // Secret
   tbKey: string;
@@ -66,6 +67,7 @@ export const defaultConfig: UserConfig = {
   catalogs: defaultCatalogs,
   nsfw: false,
   info: false,
+  tmdbId: false,
   poster: "rpdb",
   tbKey: "",
   mfpUrl: "",

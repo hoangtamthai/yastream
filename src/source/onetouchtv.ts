@@ -40,6 +40,7 @@ import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
+import { catalogMetaId } from "../utils/catalog-id.js";
 
 interface OnetouchtvTop {
   result: {
@@ -209,8 +210,14 @@ export class OnetouchtvScrapper extends BaseProvider {
         return item;
       }),
     );
-    const searches: MetaPreview[] = posterResults.map((item) => ({
-      id: `${Prefix.ONETOUCHTV}:${item.id}`,
+    const searches: MetaPreview[] = posterResults.map((item, index) => ({
+      id: config.tmdbId
+        ? catalogMetaId(
+            `${Prefix.ONETOUCHTV}:${item.id}`,
+            tmdbDetails[index],
+            config,
+          )
+        : `${Prefix.ONETOUCHTV}:${item.id}`,
       name: item.title,
       poster: item.image,
       type: type,
@@ -312,7 +319,7 @@ export class OnetouchtvScrapper extends BaseProvider {
             upsertProviderContent(providerContent);
           }
           const metaDetail: MetaDetail = {
-            id: id,
+            id: catalogMetaId(id, tmdbDetail, config),
             name: item.title,
             poster: item.image,
             background: item.image,
