@@ -182,7 +182,7 @@ export class KissKHScraperr extends BaseProvider {
       else return result.episodesCount == 1;
     });
     const tmdbDetails = await Promise.all(
-      filterResults.map((item) => tmdb.searchDetail(item.title, type)),
+      filterResults.map((item) => tmdb.searchCatalogDetail(item.title, type)),
     );
     const metas = await Promise.all(
       filterResults.map(async (kissItem, index) => {
@@ -282,7 +282,9 @@ export class KissKHScraperr extends BaseProvider {
 
     // 3. Search TMDB using the flattened list
     const tmdbDetails = await Promise.all(
-      flatDatas.map((item) => tmdb.searchDetail(item.title, type)),
+      flatDatas.map((item) =>
+        tmdb.searchCatalogDetail(item.title, type, { country: countryName }),
+      ),
     );
 
     // 4. Map to final Meta format

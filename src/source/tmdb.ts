@@ -4,7 +4,14 @@ import { URLSearchParams } from "url";
 import { axiosGet } from "../utils/axios.js";
 import { ENV } from "../utils/env.js";
 import { handleError, TmdbError } from "../utils/error.js";
+import { cache, TTL_MS } from "../utils/cache.js";
 import { extractTitle } from "../utils/format.js";
+import {
+  isCandidateAllowed,
+  MIN_TITLE_SIMILARITY,
+  parseCatalogTitle,
+  titleSimilarity,
+} from "../utils/title-variants.js";
 import { matchTitle } from "../utils/fuse.js";
 import { getProxyUrl } from "../utils/proxy/proxy.js";
 import { BaseMeta, ContentDetail } from "./meta.js";
@@ -36,6 +43,8 @@ export interface TmdbTvResult {
   first_air_date: string;
   poster_path: string;
   backdrop_path?: string;
+  origin_country?: string[];
+  original_language?: string;
 }
 export interface TmdbTvImages {
   backdrops: TmdbTvImage[];
@@ -75,6 +84,7 @@ export interface TmdbMovieResult {
   release_date: string;
   poster_path: string;
   backdrop_path?: string;
+  original_language?: string;
 }
 
 interface TmdbMovieSearch {
@@ -143,6 +153,138 @@ class TMDBService extends BaseMeta {
     } catch (error: any) {
       handleError(error, this.logger, `Search series`);
       return null;
+    }
+  }
+
+  /**
+   * Catalog lookup: the regular search first, then a stricter-but-wider
+   * fallback only when it finds nothing, so existing matches never change.
+   */
+  async searchCatalogDetail(
+    rawTitle: string,
+    type: ContentType,
+    options: {
+      query?: string | undefined;
+      year?: number | undefined;
+      country?: string | undefined;
+    } = {},
+  ): Promise<ContentDetail | null> {
+    const detail = await this.searchDetail(
+      options.query ?? rawTitle,
+      type,
+      options.year,
+    );
+    if (detail) return detail;
+    return await this.searchDetailFallback(rawTitle, type, options.country);
+  }
+
+  /**
+   * Fallback for catalog titles the regular search misses: strips edition
+   * labels ("(Uncut Version)", "(BL)"...), season subtitles, bilingual
+   * " - " titles; allows +-1 year; checks original and alternative titles;
+   * filters by the catalog's country. Never switches movie <-> series.
+   */
+  async searchDetailFallback(
+    rawTitle: string,
+    type: ContentType,
+    country?: string | undefined,
+  ): Promise<ContentDetail | null> {
+    const cacheKey = `tmdb-fallback:${type}:${country ?? ""}:${rawTitle}`;
+    const cached: { detail: ContentDetail | null } | null = cache.get(cacheKey);
+    if (cached) return cached.detail;
+    let detail: ContentDetail | null = null;
+    try {
+      detail = await this._searchDetailFallback(rawTitle, type, country);
+    } catch (error: any) {
+      handleError(error, this.logger, `Fallback search ${rawTitle}`);
+      return null; // do not cache errors
+    }
+    cache.set(cacheKey, { detail }, TTL_MS.content);
+    return detail;
+  }
+
+  private async _searchDetailFallback(
+    rawTitle: string,
+    type: ContentType,
+    country?: string | undefined,
+  ): Promise<ContentDetail | null> {
+    const kind = type === "series" ? "tv" : "movie";
+    const parsed = parseCatalogTitle(rawTitle, type);
+    for (const variant of parsed.variants) {
+      const response = await this._getRequest<{
+        results: (TmdbTvResult & TmdbMovieResult)[];
+      }>(`/search/${kind}`, { query: variant.title, include_adult: true });
+      const allowed = (response.results ?? []).slice(0, 8).filter((result) => {
+        const date = result.first_air_date || result.release_date || "";
+        const year = parseInt(date.slice(0, 4));
+        return isCandidateAllowed(
+          {
+            year: Number.isNaN(year) ? undefined : year,
+            originCountry: result.origin_country,
+            originalLanguage: result.original_language,
+          },
+          parsed,
+          variant,
+          kind,
+          country,
+        );
+      });
+
+      let best: { id: number; score: number } | null = null;
+      for (const result of allowed) {
+        const names = [
+          result.name,
+          result.title,
+          result.original_name,
+          result.original_title,
+        ].filter((name): name is string => !!name);
+        const score = Math.max(
+          ...names.map((name) => titleSimilarity(variant.title, name)),
+        );
+        if (score >= MIN_TITLE_SIMILARITY && (!best || score > best.score)) {
+          best = { id: result.id, score };
+        }
+      }
+      // Weak variants (subtitle dropped) must match the main title.
+      if (!best && !variant.weak) {
+        for (const result of allowed.slice(0, 5)) {
+          const altTitles = await this.getAlternativeTitles(kind, result.id);
+          const score = Math.max(
+            0,
+            ...altTitles.map((alt) => titleSimilarity(variant.title, alt)),
+          );
+          if (score >= MIN_TITLE_SIMILARITY) {
+            best = { id: result.id, score };
+            break;
+          }
+        }
+      }
+      if (best) {
+        this.logger.log(
+          `Fallback found | ${rawTitle} -> ${kind} ${best.id} (${variant.title}, ${best.score})`,
+        );
+        return kind === "tv"
+          ? await this.getSeriesDetail(best.id.toString())
+          : await this.getMovieDetail(best.id.toString());
+      }
+    }
+    return null;
+  }
+
+  private async getAlternativeTitles(
+    kind: "tv" | "movie",
+    id: number,
+  ): Promise<string[]> {
+    try {
+      const data = await this._getRequest<{
+        results?: { title: string }[];
+        titles?: { title: string }[];
+      }>(`/${kind}/${id}/alternative_titles`);
+      return (data.results ?? data.titles ?? [])
+        .map((alt) => alt.title)
+        .filter(Boolean);
+    } catch {
+      return [];
     }
   }
 

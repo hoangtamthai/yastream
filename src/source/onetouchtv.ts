@@ -180,7 +180,10 @@ export class OnetouchtvScrapper extends BaseProvider {
     const tmdbDetails = await Promise.all(
       searchResults.result.map((item) => {
         const { title, year } = extractTitle(item.title);
-        return tmdb.searchDetail(title, type, year);
+        return tmdb.searchCatalogDetail(item.title, type, {
+          query: title,
+          year,
+        });
       }),
     );
     const posterResults = await Promise.all(
@@ -253,7 +256,11 @@ export class OnetouchtvScrapper extends BaseProvider {
       const tmdbDetails = await Promise.all(
         filteredData.map((item) => {
           const { title, year } = extractTitle(item.title);
-          return tmdb.searchDetail(title, type, year);
+          return tmdb.searchCatalogDetail(item.title, type, {
+            query: title,
+            year,
+            country: name,
+          });
         }),
       );
       const metas = await Promise.all(
