@@ -46,6 +46,7 @@ import { ContentDetail } from "./meta.js";
 import { getPosterUrl, PosterParam } from "./poster/poster.js";
 import { BaseProvider } from "./provider.js";
 import { tmdb } from "./tmdb.js";
+import { catalogMetaId } from "../utils/catalog-id.js";
 
 export interface SearchResult {
   id: string;
@@ -214,8 +215,11 @@ export class KissKHScraperr extends BaseProvider {
           poster = this.nsfwDefaultThumbnail;
         }
 
+        const nativeId = `${Prefix.KISSKH}:${kissItem.id}`;
         const meta: MetaPreview = {
-          id: `${Prefix.KISSKH}:${kissItem.id}`,
+          id: config.tmdbId
+            ? catalogMetaId(nativeId, tmdbDetail, config)
+            : nativeId,
           name: kissItem.title,
           type: type,
           background: kissItem.thumbnail,
@@ -303,9 +307,6 @@ export class KissKHScraperr extends BaseProvider {
             type,
             fallbackUrl: tmdbDetail.thumbnail || poster,
           };
-          // if (tmdbDetail.tmdbId) {
-          //   id = `${Prefix.TMDB}:${tmdbDetail.tmdbId}`;
-          // }
           if (tmdbDetail.imdbId) {
             posterParam.prefix = Prefix.IMDB;
             posterParam.id = tmdbDetail.imdbId;
@@ -338,8 +339,9 @@ export class KissKHScraperr extends BaseProvider {
         if (!config.nsfw && this.nsfwIds.has(kissItem.id)) {
           poster = this.nsfwDefaultThumbnail;
         }
+        const metaId = catalogMetaId(id, tmdbDetail, config);
         const metaDetail: MetaDetail = {
-          id: id,
+          id: metaId,
           name: kissItem.title,
           type: type,
           background: kissItem.thumbnail,
@@ -348,7 +350,7 @@ export class KissKHScraperr extends BaseProvider {
 
         if (type === "movie") {
           metaDetail.behaviorHints = {
-            defaultVideoId: `${id}:1:1`,
+            defaultVideoId: `${metaId}:1:1`,
           };
           return metaDetail;
         }

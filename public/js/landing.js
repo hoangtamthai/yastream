@@ -228,6 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // checked type
         case "nsfw":
         case "info":
+        case "tmdbId":
           const checkInput = document.getElementById(key);
           checkInput.checked = config[key];
           break;

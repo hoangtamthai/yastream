@@ -420,7 +420,7 @@ export async function buildCatalogHandler(
   try {
     const { id, type } = args;
     const { skip, search } = args.extra;
-    const catalogKey = `catalog:${type}:${id}:${skip}:${search}:${config.nsfw}:${config.poster}`;
+    const catalogKey = `catalog:${type}:${id}:${skip}:${search}:${config.nsfw}:${config.poster}:${config.tmdbId}`;
     const cacheCatalog = cache.get(catalogKey);
     if (cacheCatalog) return cacheCatalog;
     const filteredProviders = filterProvider(providers, id, config, "catalog");
